@@ -1,0 +1,106 @@
+@startuml UML用例图
+' 行为性图：用例图。展示各类用户及其可执行的功能，按模块分组
+skinparam defaultFontName "Microsoft YaHei"
+skinparam shadowing false
+skinparam packageStyle rectangle
+left to right direction
+
+title 活动票务与报名系统 · 用例图
+
+actor "游客" as Guest
+actor "参与者" as Participant
+actor "组织者" as Organizer
+actor "检票员" as Inspector
+actor "管理员" as Admin
+actor "定时调度" as Timer
+
+Guest <|- Participant
+
+rectangle "活动票务与报名系统" {
+  package "公开访问（M1/M4/M9）" {
+    usecase "注册 / 登录" as UC_Login
+    usecase "组合查询活动" as UC_Search
+    usecase "查看活动详情" as UC_Detail
+    usecase "发表评论 / 回复" as UC_Comment
+  }
+
+  package "报名与票券（M5/M6/M8）" {
+    usecase "报名" as UC_Register
+    usecase "进入候补" as UC_Wait
+    usecase "退票（取消报名）" as UC_Cancel
+    usecase "自动递补" as UC_Promote
+    usecase "查看本人票券" as UC_Tickets
+    usecase "清理失效票券" as UC_Clean
+    usecase "查看消息" as UC_Msg
+  }
+
+  package "互动与个人中心（M9/M10）" {
+    usecase "点赞他人评论" as UC_Like
+    usecase "活动结束后评分" as UC_Rate
+    usecase "收藏 / 取消收藏" as UC_Fav
+  }
+
+  package "活动管理（M2/M7/M11）" {
+    usecase "编辑活动草稿\n（场次、票种）" as UC_Draft
+    usecase "提交审核" as UC_Submit
+    usecase "申请修改已发布活动" as UC_Change
+    usecase "取消活动 / 场次" as UC_CancelAct
+    usecase "分配检票员" as UC_Assign
+    usecase "导出名单" as UC_Export
+    usecase "查看统计" as UC_Stats
+  }
+
+  package "检票（M7）" {
+    usecase "检票核销" as UC_Check
+    usecase "候补失效 / 标记缺席" as UC_Expire
+  }
+
+  package "平台管理（M3/M12）" {
+    usecase "审核申办申请" as UC_Review
+    usecase "审核修改申请" as UC_ReviewChange
+    usecase "查看全部活动状态" as UC_All
+    usecase "查询操作日志" as UC_Log
+  }
+}
+
+Guest --> UC_Login
+Guest --> UC_Search
+Guest --> UC_Detail
+Guest --> UC_Comment
+
+Participant --> UC_Register
+Participant --> UC_Cancel
+Participant --> UC_Tickets
+Participant --> UC_Clean
+Participant --> UC_Msg
+Participant --> UC_Like
+Participant --> UC_Rate
+Participant --> UC_Fav
+
+UC_Wait .> UC_Register : <<extend>>\n名额已满
+UC_Cancel .> UC_Promote : <<include>>
+
+Organizer --> UC_Draft
+Organizer --> UC_Submit
+Organizer --> UC_Change
+Organizer --> UC_CancelAct
+Organizer --> UC_Assign
+Organizer --> UC_Export
+Organizer --> UC_Stats
+
+Inspector --> UC_Check
+
+UC_Review <-- Admin
+UC_ReviewChange <-- Admin
+UC_All <-- Admin
+UC_Log <-- Admin
+UC_CancelAct <-- Admin
+UC_Export <-- Admin
+UC_Stats <-- Admin
+
+UC_ReviewChange .> UC_Promote : <<include>>\n扩容时
+
+UC_Expire <-- Timer
+UC_Promote <-- Timer
+
+@enduml

@@ -1,0 +1,61 @@
+@startuml UML时序图-退票与递补
+' 交互性图：时序图。参与者退票释放名额，系统在同一事务内按顺序递补候补者
+skinparam defaultFontName "Microsoft YaHei"
+skinparam shadowing false
+autonumber
+
+title 退票与自动递补 · 时序图
+
+actor "参与者A" as A
+participant "Web 前端" as UI
+participant "HTTP API\n身份认证" as API
+participant "M5 报名与候补" as REG
+participant "M6 票券" as TKT
+participant "M12 操作日志" as LOG
+database "数据库" as DB
+actor "候补者B" as B
+
+A -> UI : 在“我的票券”点击退票并确认
+UI -> API : POST 取消报名
+API -> API : 校验登录身份
+API -> REG : cancel(A, 报名编号)
+activate REG
+REG -> DB : 开始事务
+REG -> DB : 读取报名记录
+DB --> REG : 报名成功，属于 A
+
+alt 不是本人 / 已签到 / 检票已开始
+  REG -> DB : 回滚
+  REG --> API : 拒绝并说明原因
+  API --> UI : 403 / 409
+  UI --> A : 提示无法退票
+else 已经取消过
+  REG -> DB : 回滚
+  REG --> API : 返回原取消结果
+  API --> UI : 200
+else 允许退票
+  REG -> DB : 报名记录改为“已取消”
+  REG -> TKT : invalidate(A 的正式票)
+  REG -> LOG : 记录“退票”
+  REG -> DB : 查询同类别最早的候补记录 [报名未截止]
+  DB --> REG : B 的候补记录
+  opt 存在可递补的候补
+    REG -> DB : B 的记录改为“报名成功”
+    REG -> TKT : invalidate(B 的候补凭证)
+    REG -> TKT : issueFormal(B 的报名)
+    TKT -> DB : 生成唯一正式票码
+    REG -> LOG : 记录“候补递补”
+  end
+  REG -> DB : 提交事务（全部成功或全部不生效）
+  REG --> API : 退票成功
+  API --> UI : 200
+  UI --> A : 票券显示为已失效
+end
+deactivate REG
+
+B -> UI : 刷新“我的票券”
+UI -> API : GET 本人票券
+API --> UI : 正式票（可检票）
+UI --> B : 显示报名成功和正式票
+
+@enduml

@@ -1,0 +1,101 @@
+@startuml UML组件图
+' 结构性图：组件图。描述整体分层架构、模块划分及模块之间的依赖
+skinparam defaultFontName "Microsoft YaHei"
+skinparam shadowing false
+skinparam componentStyle uml2
+
+title 活动票务与报名系统 · 组件图（整体架构）
+
+package "表现层：响应式 Web 前端" {
+  [活动广场与详情页] as UI_Public
+  [个人中心页] as UI_Me
+  [活动管理页] as UI_Org
+  [审核与平台管理页] as UI_Admin
+  [检票页] as UI_Check
+}
+
+package "接口层" {
+  [HTTP API 路由] as API
+  [身份认证与输入校验] as Gate
+}
+
+package "业务层" {
+  [M1 账户与权限] as M1
+  [M2 活动管理] as M2
+  [M3 活动审核] as M3
+  [M4 活动查询] as M4
+  [M5 报名与候补] as M5
+  [M6 票券] as M6
+  [M7 检票签到] as M7
+  [M8 消息通知] as M8
+  [M9 评论与评分] as M9
+  [M10 收藏与个人中心] as M10
+  [M11 名单与统计] as M11
+  [M12 操作日志] as M12
+  [S1 定时调度] as S1
+}
+
+package "数据层" {
+  [S2 数据访问与事务] as DAO
+  database "关系数据库" as DB
+}
+
+UI_Public --> API
+UI_Me --> API
+UI_Org --> API
+UI_Admin --> API
+UI_Check --> API
+
+API --> Gate
+Gate --> M1 : 识别身份 / 鉴权
+
+API --> M2
+API --> M3
+API --> M4
+API --> M5
+API --> M7
+API --> M9
+API --> M10
+API --> M11
+API --> M12
+
+M3 --> M2 : 发布 / 修改生效
+M3 --> M5 : 扩容后递补
+M2 --> M5 : 取消范围内报名
+M5 --> M6 : 发放 / 作废凭证
+M5 --> M8 : 候补入队提醒
+M7 --> M6 : 核验正式票
+M7 --> M5 : 标记已签到 / 缺席
+M9 ..> M7 : 查询出席身份
+M9 ..> M2 : 查询官方身份
+M10 ..> M6 : 读取本人票券
+M10 ..> M8 : 读取本人消息
+M11 ..> M5 : 读取报名
+M11 ..> M7 : 读取签到
+
+S1 --> M5 : 截止后候补失效
+S1 --> M7 : 场次结束标记缺席
+S1 --> M2 : 活动结束
+
+M2 ..> M12 : 写日志
+M3 ..> M12 : 写日志
+M5 ..> M12 : 写日志
+M7 ..> M12 : 写日志
+M9 ..> M12 : 写日志
+
+M2 --> DAO
+M5 --> DAO
+M6 --> DAO
+M7 --> DAO
+M8 --> DAO
+M9 --> DAO
+M12 --> DAO
+DAO --> DB : 事务 / 外键 / 唯一约束
+
+note right of M5
+  名额相关的写操作
+  （报名、退票、递补）
+  只在本模块的事务内完成
+end note
+
+@enduml

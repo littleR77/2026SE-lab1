@@ -1,0 +1,33 @@
+@startuml UML状态图-活动
+' 行为性图：状态图。活动的审核发布生命周期，以及已发布活动的修改申请
+skinparam defaultFontName "Microsoft YaHei"
+skinparam shadowing false
+
+title 活动 · 状态图
+
+state "草稿" as Draft
+state "待审核" as Pending
+state "已发布" as Published {
+  state "无待审修改" as Stable
+  state "修改待审核" as ChangePending : 仍展示原信息
+  [*] --> Stable
+  Stable --> ChangePending : 组织者提交修改申请\n[只能增加名额、改地点或时间]
+  ChangePending --> Stable : 管理员通过 / 新内容生效
+  ChangePending --> Stable : 管理员驳回或组织者撤回 / 原内容不变
+}
+state "已结束" as Ended
+state "已取消" as Cancelled
+
+[*] --> Draft : 组织者创建
+Draft --> Pending : 提交审核
+Pending --> Draft : 管理员说明原因后驳回
+Pending --> Published : 管理员审核通过
+Published --> Ended : 全部场次结束（定时调度）
+Draft --> Cancelled : 组织者取消
+Pending --> Cancelled : 组织者取消
+Published --> Cancelled : 组织者或管理员取消\n/ 范围内报名取消、票券失效
+
+Ended --> [*]
+Cancelled --> [*]
+
+@enduml

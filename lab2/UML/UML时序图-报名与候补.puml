@@ -1,0 +1,83 @@
+@startuml UML时序图-报名与候补
+' 交互性图：时序图。两名参与者同时争抢最后一个名额，后到者进入候补并收到提醒
+skinparam defaultFontName "Microsoft YaHei"
+skinparam shadowing false
+autonumber
+
+title 争抢最后一个名额与进入候补 · 时序图
+
+actor "参与者A" as A
+actor "参与者B" as B
+participant "Web 前端" as UI
+participant "HTTP API\n身份认证" as API
+participant "M5 报名与候补" as REG
+participant "M6 票券" as TKT
+participant "M8 消息通知" as MSG
+participant "M12 操作日志" as LOG
+database "数据库" as DB
+
+par 几乎同时提交
+  A -> UI : 选择场次和类别，点击报名
+  UI -> API : POST 报名
+else
+  B -> UI : 选择同一类别，点击报名
+  UI -> API : POST 报名
+end
+
+API -> REG : register(A, 类别)
+activate REG
+REG -> DB : 开始事务（写锁）
+REG -> DB : 校验报名窗口、活动状态
+REG -> DB : 查询 A 在该场次的有效报名
+DB --> REG : 无
+REG -> DB : 统计已占用名额
+DB --> REG : 剩余 1
+REG -> DB : 新建报名记录（报名成功）
+REG -> TKT : issueFormal(报名)
+TKT -> DB : 生成唯一正式票码
+REG -> LOG : 记录“报名成功”
+REG -> DB : 提交事务
+REG --> API : 报名成功 + 正式票
+deactivate REG
+API --> UI : 200
+UI --> A : 显示正式票
+
+API -> REG : register(B, 类别)
+activate REG
+note right of REG
+  B 的请求等待 A 的事务提交后才执行，
+  因此看到的剩余名额为 0，不会超额
+end note
+REG -> DB : 开始事务（写锁）
+REG -> DB : 统计已占用名额
+DB --> REG : 剩余 0
+alt 报名尚未截止
+  REG -> DB : 新建报名记录（候补中，记录排队时间）
+  REG -> TKT : issueWaitlist(报名)
+  TKT -> DB : 生成候补凭证
+  REG -> MSG : notifyQueued(B, 报名)
+  MSG -> DB : 按事件键写入消息（已存在则跳过）
+  REG -> LOG : 记录“进入候补”
+  REG -> DB : 提交事务
+  REG --> API : 已进入候补 + 排位
+  API --> UI : 200
+  UI --> B : 显示候补凭证和排位，消息区出现提醒
+else 已截止
+  REG -> DB : 回滚事务
+  REG --> API : 报名已截止
+  API --> UI : 409
+  UI --> B : 提示报名已截止
+end
+deactivate REG
+
+== 重复提交 ==
+A -> UI : 再次点击报名
+UI -> API : POST 报名
+API -> REG : register(A, 类别)
+REG -> DB : 查询 A 在该场次的有效报名
+DB --> REG : 已存在
+REG --> API : 返回已有报名，不新建记录、不重复记日志
+API --> UI : 200
+UI --> A : 显示原有正式票
+
+@enduml

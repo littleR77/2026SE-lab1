@@ -1,0 +1,226 @@
+@startuml UML类图
+' 结构性图：领域类图。按模块分包，展示需要保存的数据及其关联（REQ-023）
+skinparam defaultFontName "Microsoft YaHei"
+skinparam shadowing false
+skinparam classAttributeIconSize 0
+skinparam packageStyle rectangle
+hide empty methods
+
+title 活动票务与报名系统 · 类图
+
+package "M1 账户与权限" {
+  enum Role <<枚举>> {
+    参与者
+    组织者
+    检票员
+    管理员
+  }
+  class "用户 User" as User {
+    - id : Long
+    - account : String {unique}
+    - displayName : String
+    - passwordHash : String
+    - role : Role
+  }
+  class "登录会话 AuthSession" as AuthSession {
+    - tokenHash : String {unique}
+    - expiresAt : DateTime
+  }
+}
+
+package "M2/M3 活动管理与审核" {
+  enum ActivityStatus <<枚举>> {
+    草稿
+    待审核
+    已发布
+    已结束
+    已取消
+  }
+  enum ChangeStatus <<枚举>> {
+    待审核
+    已通过
+    已驳回
+    已撤回
+  }
+  class "活动 Activity" as Activity {
+    - id : Long
+    - title : String
+    - description : String
+    - category : String
+    - status : ActivityStatus
+    - reviewReason : String
+    - cancelReason : String
+    - version : Integer
+    + submitForReview()
+    + approve()
+    + reject(reason)
+    + cancel(reason)
+  }
+  class "场次 Session" as EventSession {
+    - id : Long
+    - location : String
+    - startAt : DateTime
+    - endAt : DateTime
+    - regOpenAt : DateTime
+    - regCloseAt : DateTime
+    - cancelDeadline : DateTime
+    - checkinStartAt : DateTime
+    - cancelled : Boolean
+  }
+  class "票种/报名类别 TicketType" as TicketType {
+    - id : Long
+    - name : String {场次内唯一}
+    - capacity : Integer {>0，只增不减}
+    - cancelled : Boolean
+    + remaining() : Integer
+  }
+  class "修改申请 ChangeRequest" as ChangeRequest {
+    - id : Long
+    - beforeContent : JSON
+    - afterContent : JSON
+    - baseVersion : Integer
+    - status : ChangeStatus
+    - reason : String
+  }
+}
+
+package "M5 报名与候补" {
+  enum RegistrationStatus <<枚举>> {
+    候补中
+    报名成功
+    已签到
+    已取消
+    缺席
+    候补失效
+  }
+  class "报名记录 Registration" as Registration {
+    - id : Long
+    - status : RegistrationStatus
+    - queuedAt : DateTime
+    - createdAt : DateTime
+    - updatedAt : DateTime
+    + cancel()
+    + promote()
+  }
+}
+
+package "M6 票券" {
+  enum TicketKind <<枚举>> {
+    正式票
+    候补凭证
+  }
+  class "票券 Ticket" as Ticket {
+    - code : String {unique}
+    - kind : TicketKind
+    - valid : Boolean
+    - hiddenByOwner : Boolean
+    + invalidate()
+  }
+}
+
+package "M7 检票签到" {
+  class "检票授权 CheckinAssignment" as CheckinAssignment {
+    - assignedAt : DateTime
+  }
+  class "签到记录 Checkin" as Checkin {
+    - checkedAt : DateTime
+  }
+}
+
+package "M8 消息通知" {
+  class "消息 Message" as Message {
+    - id : Long
+    - type : String
+    - content : String
+    - read : Boolean
+    - eventKey : String {unique，防重复通知}
+    - createdAt : DateTime
+  }
+}
+
+package "M9 评论与评分" {
+  enum AuthorBadge <<枚举>> {
+    游客
+    已出席
+    活动官方
+  }
+  class "评论/回复 Comment" as Comment {
+    - id : Long
+    - content : String
+    - guestName : String
+    - badge : AuthorBadge
+    - createdAt : DateTime
+  }
+  class "点赞 CommentLike" as CommentLike {
+    - createdAt : DateTime
+  }
+  class "评分 Rating" as Rating {
+    - stars : Integer {1..5}
+    - createdAt : DateTime
+  }
+}
+
+package "M10 收藏" {
+  class "收藏 Favorite" as Favorite {
+    - createdAt : DateTime
+  }
+}
+
+package "M12 操作日志" {
+  class "操作日志 OperationLog" as OperationLog {
+    - id : Long
+    - action : String
+    - targetType : String
+    - targetId : Long
+    - result : String
+    - detail : JSON
+    - createdAt : DateTime
+  }
+}
+
+User "1" *-- "0..*" AuthSession : 持有 >
+User "1" -- "0..*" Activity : 组织 >
+Activity "1" *-- "1..*" EventSession : 包含 >
+EventSession "1" *-- "1..*" TicketType : 包含 >
+Activity "1" o-- "0..*" ChangeRequest : 修改申请 >
+
+User "1" -- "0..*" Registration : 提交 >
+TicketType "1" -- "0..*" Registration : 选择 <
+Registration "1" -- "0..1" Ticket : 凭证 >
+
+User "1" -- "0..*" CheckinAssignment : 检票员 <
+EventSession "1" -- "0..*" CheckinAssignment : 授权场次 <
+Ticket "1" -- "0..1" Checkin : 核销 <
+User "1" -- "0..*" Checkin : 执行 >
+
+User "1" -- "0..*" Message : 接收 >
+Registration "0..1" -- "0..*" Message : 关联 <
+
+Activity "1" -- "0..*" Comment : 讨论 >
+User "0..1" -- "0..*" Comment : 发表 >
+Comment "0..1" -- "0..*" Comment : 回复 <
+Comment "1" -- "0..*" CommentLike : 被赞 >
+User "1" -- "0..*" CommentLike : 点赞 >
+Activity "1" -- "0..*" Rating : 评分 >
+User "1" -- "0..*" Rating : 提交 >
+
+User "1" -- "0..*" Favorite : 收藏 >
+Activity "1" -- "0..*" Favorite : 被收藏 <
+
+User "0..1" -- "0..*" OperationLog : 操作者 <
+Activity "0..1" -- "0..*" OperationLog : 关联活动 <
+
+note bottom of Registration
+  唯一约束：同一用户在同一场次
+  至多一条有效报名（候补中/报名成功/已签到）
+end note
+
+note bottom of CommentLike
+  （用户, 评论）唯一，不能给本人评论点赞
+end note
+
+note bottom of Favorite
+  （用户, 活动）唯一，按 createdAt 排序展示
+end note
+
+@enduml

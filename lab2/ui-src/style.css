@@ -133,7 +133,7 @@ body {
 .stat .num small { font-size: 14px; color: var(--ink-3); font-weight: 600; }
 
 /* 吉祥物 */
-.mascot { position: absolute; width: 120px; height: 104px; pointer-events: none; }
+.mascot { position: absolute; width: 120px; height: auto; pointer-events: none; }
 
 /* 手机 */
 .phone-status { position: absolute; top: 0; left: 0; right: 0; height: 44px; padding: 0 26px; display: flex; align-items: center; justify-content: space-between; font-weight: 700; font-size: 14px; color: #fff; }
@@ -147,3 +147,7 @@ body {
 .code { font-family: "Consolas", monospace; font-size: 22px; font-weight: 800; letter-spacing: 2px; color: var(--ink); }
 .dim { filter: grayscale(0.8); opacity: 0.65; }
 .mask { position: absolute; inset: 0; background: rgba(13, 40, 80, 0.35); }
+
+/* 吉祥物趴着的小提示卡 */
+.perch { position: absolute; left: 14px; right: 40px; bottom: 14px; padding: 40px 14px 12px; border-radius: 16px; background: rgba(255,255,255,0.78); border: 1.5px solid #fff; font-size: 12px; line-height: 1.7; color: var(--ink-3); }
+.perch .mascot { width: 100px; right: -38px; top: -46px; }

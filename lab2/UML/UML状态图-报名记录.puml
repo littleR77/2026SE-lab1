@@ -16,11 +16,13 @@ state "候补失效" as Expired : 历史保留
 [*] --> Waiting : 提交报名 [类别已满且未截止]\n/ 发放候补凭证、发送入队提醒
 
 Waiting --> Confirmed : 有名额释放或扩容获批 [报名截止前、排在队首]\n/ 换发正式票
-Waiting --> Cancelled : 本人退出候补 [检票开始前]\n或活动/场次/类别被取消
+Waiting --> Cancelled : 本人退出候补 [检票开始前]
+Waiting --> [*] : 活动/场次/类别被取消\n/ 清空候补队列，删除候补记录和候补凭证
 Waiting --> Expired : 报名截止仍未递补
 
 Confirmed --> CheckedIn : 授权检票员核销 [检票窗口内]
-Confirmed --> Cancelled : 本人退票 [检票开始前]\n或活动/场次/类别被取消\n/ 释放名额并触发递补
+Confirmed --> Cancelled : 本人退票 [检票开始前]\n/ 释放名额并触发递补
+Confirmed --> Cancelled : 活动/场次/类别被取消\n/ 票券失效，不触发递补
 Confirmed --> Absent : 场次结束仍未签到\n/ 票券失效
 
 CheckedIn --> CheckedIn : 重复检票\n/ 返回首次结果，不新增记录

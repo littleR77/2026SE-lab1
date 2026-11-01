@@ -25,7 +25,7 @@ Pending --> Published : 管理员审核通过
 Published --> Ended : 全部场次结束（定时调度）
 Draft --> Cancelled : 组织者取消
 Pending --> Cancelled : 组织者取消
-Published --> Cancelled : 组织者或管理员取消\n/ 范围内报名取消、票券失效
+Published --> Cancelled : 组织者或管理员取消\n/ 范围内报名取消、票券失效，\n清空候补队列，不触发递补
 
 Ended --> [*]
 Cancelled --> [*]

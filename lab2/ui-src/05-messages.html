@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8"><title>界面5 消息与收藏</title><link rel="stylesheet" href="style.css">
+<style>
+.msg { padding: 14px 16px; border-radius: 20px; position: relative; }
+.msg .unread { position: absolute; left: -4px; top: 20px; width: 10px; height: 10px; border-radius: 50%; background: var(--blue); border: 2px solid #fff; }
+.fav { padding: 9px 12px; border-radius: 18px; display: flex; gap: 12px; align-items: center; }
+.thumb { width: 44px; height: 44px; border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 26px; flex: none; }
+</style></head>
+<body class="m">
+<div class="cloud" style="left:300px;top:70px"></div>
+<div class="cloud sm faint" style="left:-10px;top:800px"></div>
+
+<div class="phone-status"><span>9:41</span><span>●●● ▮</span></div>
+<div class="row" style="position:absolute;left:20px;right:20px;top:54px;gap:12px">
+  <div class="avatar" style="width:46px;height:46px;font-size:18px">小</div>
+  <div><div class="title h2" style="color:#fff;text-shadow:0 2px 8px rgba(0,60,140,.35)">小雨的个人中心</div><div class="small" style="color:#eef7ff">参与者 · 已参加 5 场活动</div></div>
+</div>
+
+<!-- 横幅提醒 -->
+<div class="glass strong" style="position:absolute;left:16px;right:16px;top:112px;padding:10px 14px;border-radius:18px;border-color:#ffd59a;background:rgba(255,247,232,.95)">
+  <div class="row"><span style="font-size:20px">🔔</span><div class="grow small"><b style="color:var(--orange)">新消息：</b>你已加入《陶艺手作工作坊》候补队列</div><span class="small link">查看</span></div>
+</div>
+
+<!-- 消息 -->
+<div style="position:absolute;left:16px;right:16px;top:172px">
+  <div class="seg"><div class="on">消息 <span class="tag red" style="height:18px;margin-left:4px;padding:0 6px">1</span></div><div>收藏 3</div></div>
+  <div class="col mt12" style="gap:8px">
+    <div class="glass strong msg">
+      <span class="unread"></span>
+      <div class="row between"><span class="tag orange">候补提醒</span><span class="small muted">10 分钟前</span></div>
+      <div class="mt8" style="line-height:1.6;font-size:14px">已加入《陶艺手作工作坊》候补队列，当前<b style="color:var(--orange)">第 2 位</b>。</div>
+      <div class="small muted mt8">⚠ 候补不代表已获得入场名额，候补凭证不能检票。</div>
+    </div>
+    <div class="glass msg" style="padding:10px 16px">
+      <div class="row between"><span class="sub small">已加入《星空摄影社开放日》候补，第 5 位</span><span class="small muted">10/20</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- 收藏（下半部分示意） -->
+<div class="glass" style="position:absolute;left:16px;right:16px;top:432px;padding:14px 16px;border-radius:24px">
+  <div class="row between"><div class="h3">我的收藏</div><span class="small muted">按收藏时间 · 最新在前</span></div>
+  <div class="col mt12" style="gap:10px">
+    <div class="fav glass strong"><div class="thumb" style="background:linear-gradient(135deg,#a9e3ff,#5fb8ff)">🎸</div><div class="grow"><b>草坪音乐会 · 秋日限定</b><div class="small muted mt8">收藏于 10/29 · <span class="tag green" style="height:20px">报名中</span></div></div><span style="font-size:22px;color:#f5b400">★</span></div>
+    <div class="fav glass strong"><div class="thumb" style="background:linear-gradient(135deg,#c4f2de,#5fd3a2)">🎻</div><div class="grow"><b>弦乐四重奏午间音乐会</b><div class="small muted mt8">收藏于 10/22 · <span class="tag blue" style="height:20px">进行中</span></div></div><span style="font-size:22px;color:#f5b400">★</span></div>
+    <div class="fav glass dim"><div class="thumb" style="background:linear-gradient(135deg,#ffd6d8,#f59ca0)">🎺</div><div class="grow"><b>管乐团户外快闪</b><div class="small muted mt8">收藏于 10/18 · <span class="tag gray" style="height:20px">已取消</span></div></div><span class="small link" style="color:var(--ink-3)">取消收藏</span></div>
+  </div>
+</div>
+
+<div class="tabbar glass strong">
+  <div class="t"><span class="i">🏠</span>广场</div>
+  <div class="t"><span class="i">🎫</span>票券</div>
+  <div class="t on"><span class="i">💬</span>消息</div>
+  <div class="t"><span class="i">👤</span>我的</div>
+</div>
+</body></html>

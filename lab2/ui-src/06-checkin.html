@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8"><title>界面6 检票</title><link rel="stylesheet" href="style.css">
+<style>
+.res { padding: 14px 16px; border-radius: 18px; display: flex; gap: 12px; align-items: center; }
+.res .ic { width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #fff; font-weight: 800; font-size: 20px; flex: none; }
+</style></head>
+<body class="m">
+<div class="cloud" style="left:280px;top:90px"></div>
+<div class="cloud sm faint" style="left:10px;top:780px"></div>
+
+<div class="phone-status"><span>9:41</span><span>●●● ▮</span></div>
+<!-- 断网提示横幅 -->
+<div style="position:absolute;left:0;right:0;top:44px;height:30px;background:rgba(229,72,77,.92);color:#fff;font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center">⚠ 网络已断开，暂停核验，正在自动重试…（示意）</div>
+
+<div class="row between" style="position:absolute;left:20px;right:20px;top:86px">
+  <div class="title h1" style="color:#fff;text-shadow:0 2px 8px rgba(0,60,140,.35)">检票</div>
+  <span class="tag blue" style="background:#fff">检票员 · 阿杰</span>
+</div>
+
+<div class="glass strong" style="position:absolute;left:16px;right:16px;top:140px;padding:18px">
+  
+  <div class="label">当前场次（仅显示已授权场次）</div>
+  <div class="field filled">🎸 草坪音乐会 · 11/05 19:00 ▾</div>
+  <div class="small muted mt8">检票时间 18:30 – 21:00 · 当前可检票</div>
+  <div class="label mt16">票码</div>
+  <div class="row" style="gap:8px"><div class="field filled grow code" style="font-size:18px;height:52px">TK-8F3A-21C9</div></div>
+  <div class="btn primary block mt12" style="height:52px;font-size:17px">核 验</div>
+</div>
+
+<div class="col" style="position:absolute;left:16px;right:16px;top:432px;gap:10px">
+  <div class="res glass strong" style="background:rgba(226,248,237,.95);border-color:#a9e8c8">
+    <div class="ic" style="background:var(--green)">✓</div>
+    <div class="grow"><b style="color:var(--green)">核验通过</b><div class="small sub">小雨 · 普通观众票 · 18:52 签到</div></div>
+  </div>
+  <div class="res glass strong" style="background:rgba(255,246,226,.95);border-color:#ffd59a">
+    <div class="ic" style="background:var(--orange)">!</div>
+    <div class="grow"><b style="color:var(--orange)">该票已签到</b><div class="small sub">首次签到 18:52 · 不重复计数</div></div>
+  </div>
+  <div class="res glass strong" style="background:rgba(255,234,235,.95);border-color:#ffc2c4">
+    <div class="ic" style="background:var(--red)">✕</div>
+    <div class="grow"><b style="color:var(--red)">无法入场</b><div class="small sub">候补凭证不可入场 / 非本场次 / 票码无效</div></div>
+  </div>
+</div>
+
+<div class="glass strong" style="position:absolute;left:16px;right:16px;bottom:20px;padding:14px 18px">
+  <img class="mascot" src="mascot.svg" style="right:10px;top:-62px;width:88px;height:76px">
+  <div class="row between"><span class="sub" style="font-weight:600">本场已签到</span><span><b style="font-size:26px">86</b> <span class="muted">/ 168 应到</span></span></div>
+  <div style="height:8px;border-radius:4px;background:#e4eefa;margin-top:8px;overflow:hidden"><i style="display:block;width:51%;height:100%;background:var(--green);border-radius:4px"></i></div>
+</div>
+</body></html>

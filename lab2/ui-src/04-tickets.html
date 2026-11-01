@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8"><title>界面4 我的票券</title><link rel="stylesheet" href="style.css">
+<style>
+.ticket { padding: 16px 18px; border-radius: 22px; }
+.ticket .top { display: flex; justify-content: space-between; align-items: flex-start; }
+.ticket .name { font-size: 16px; font-weight: 800; }
+.ticket .meta { font-size: 12px; color: var(--ink-2); margin-top: 4px; }
+.perf { border-top: 2px dashed rgba(140, 170, 210, 0.6); margin: 12px -18px 10px; }
+</style></head>
+<body class="m">
+<div class="cloud" style="left:290px;top:60px"></div>
+<div class="cloud sm faint" style="left:-20px;top:760px"></div>
+
+<div class="phone-status"><span>9:41</span><span>●●● ▮</span></div>
+<div class="row between" style="position:absolute;left:20px;right:20px;top:52px">
+  <div class="title h1" style="color:#fff;text-shadow:0 2px 8px rgba(0,60,140,.35)">我的票券</div>
+  <div class="bell">🔔<span class="dot">1</span></div>
+</div>
+<div class="seg" style="position:absolute;left:20px;right:20px;top:108px"><div class="on">有效 3</div><div>全部 6</div></div>
+
+<div class="col" style="position:absolute;left:16px;right:16px;top:162px;gap:12px">
+  <div class="glass strong ticket">
+    <div class="top"><div><div class="name">草坪音乐会 · 秋日限定</div><div class="meta">11/05 周四 19:00 · 东区大草坪 · 普通观众票</div></div><span class="tag green">正式票</span></div>
+    <div class="perf"></div>
+    <div class="row between"><div><div class="small muted">票码</div><div class="code">TK-8F3A-21C9</div></div><div style="text-align:right"><div class="small" style="color:var(--green);font-weight:700">可入场</div><div class="small muted">18:30 开始检票</div></div></div>
+    <div class="row between mt12"><span class="small muted">检票开始前可退票</span><span class="btn ghost-red sm">退票</span></div>
+  </div>
+
+  <div class="glass strong ticket" style="border-color:#ffd59a">
+    <div class="top"><div><div class="name">陶艺手作工作坊</div><div class="meta">11/08 周六 10:00 · 艺术楼 201 · 体验名额</div></div><span class="tag orange">候补凭证</span></div>
+    <div class="perf"></div>
+    <div class="row between"><div><div class="small muted">候补排位</div><div class="code" style="color:var(--orange);letter-spacing:0;font-family:'Microsoft YaHei'">第 2 位</div></div><div style="text-align:right"><div class="small" style="color:var(--orange);font-weight:700">不可入场</div><div class="small muted">递补后自动换发正式票</div></div></div>
+    <div class="row between mt12"><span class="small muted">报名截止后未递补将失效</span><span class="btn ghost-red sm">退出候补</span></div>
+  </div>
+
+  <div class="glass ticket dim">
+    <div class="top"><div><div class="name">钢琴社秋季音乐分享</div><div class="meta">10/25 周六 19:00 · 琴房</div></div><span class="tag red">缺席</span></div>
+  </div>
+  <div class="glass ticket dim">
+    <div class="top"><div><div class="name">管乐团户外快闪</div><div class="meta">10/30 周五 16:00 · 活动已取消</div></div><span class="tag gray">已失效</span></div>
+  </div>
+  <div class="btn ghost block sm">🧹 清理失效记录（2）</div>
+</div>
+
+<!-- 退票确认弹窗 -->
+<div class="mask" style="top:520px;background:linear-gradient(180deg,rgba(13,40,80,0),rgba(13,40,80,.35) 30%)"></div>
+<div class="glass strong" style="position:absolute;left:10px;right:10px;bottom:10px;padding:24px 22px 22px;text-align:center;background:rgba(255,255,255,.96);border-radius:30px;z-index:3">
+  <img class="mascot" src="mascot.svg" style="right:18px;top:-66px;width:92px;height:80px">
+  <div style="width:44px;height:5px;border-radius:3px;background:#d3dbe8;margin:-10px auto 12px"></div>
+  <div class="title h2">确定要退票吗？</div>
+  <div class="small sub mt12" style="line-height:1.8">《草坪音乐会 · 秋日限定》11/05 场<br>退票后票码 TK-8F3A-21C9 立即失效，<br>名额将按顺序释放给候补的同学。</div>
+  <div class="row mt20" style="gap:10px"><div class="btn ghost grow">再想想</div><div class="btn danger grow">确定退票</div></div>
+</div>
+
+<div class="tabbar glass strong">
+  <div class="t"><span class="i">🏠</span>广场</div>
+  <div class="t on"><span class="i">🎫</span>票券</div>
+  <div class="t"><span class="i">💬</span>消息</div>
+  <div class="t"><span class="i">👤</span>我的</div>
+</div>
+</body></html>

@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8"><title>界面9 审核台</title><link rel="stylesheet" href="style.css">
+<style>
+.table tr.sel td { background: rgba(10, 140, 240, 0.1); }
+.diff td.new { color: var(--blue); font-weight: 700; }
+</style></head>
+<body>
+<div class="cloud lg faint" style="left:640px;top:930px"></div>
+
+<div class="nav glass strong">
+  <div class="logo"><span class="logo-mark">☁</span>活动现场</div>
+  <a>活动广场</a><a class="on">平台管理</a>
+  <div class="grow"></div>
+  <div class="bell">🔔</div>
+  <div class="avatar" style="background:linear-gradient(135deg,#ffe0b3,#c9e6ff)">管</div><span class="sub" style="font-weight:600">平台管理员</span>
+</div>
+
+<div class="side glass">
+  <div class="item on">🗂 待审核 <span class="badge">3</span></div>
+  <div class="item">🌐 全部活动</div>
+  <div class="item">📊 平台统计</div>
+  <div class="item">🧾 操作日志</div>
+  <img class="mascot" src="mascot.svg" style="left:50px;bottom:22px;width:110px;height:96px">
+</div>
+
+<div class="main">
+  <div class="title h1" style="color:#fff;text-shadow:0 2px 10px rgba(0,60,140,.35)">待审核申请</div>
+
+  <div class="row mt16" style="gap:18px;align-items:flex-start">
+    <!-- 列表 -->
+    <div class="glass strong" style="flex:1;padding:16px 18px;border-radius:22px">
+      <div class="row"><span class="chip on">全部 3</span><span class="chip">申办 1</span><span class="chip">修改 2</span></div>
+      <table class="table mt12">
+        <tr><th>类型</th><th>活动</th><th>组织者</th><th>提交时间</th></tr>
+        <tr class="sel"><td><span class="tag orange">修改</span></td><td><b>草坪音乐会 · 秋日限定</b></td><td>文艺部</td><td>10/31 10:12</td></tr>
+        <tr><td><span class="tag blue">申办</span></td><td><b>星空摄影社开放日</b></td><td>摄影社</td><td>10/31 09:40</td></tr>
+        <tr><td><span class="tag orange">修改</span></td><td><b>陶艺手作工作坊</b></td><td>美育中心</td><td>10/30 17:05</td></tr>
+      </table>
+      <div class="glass mt16" style="padding:12px 14px;border-radius:14px;background:rgba(227,242,255,.9)">
+        <div class="small" style="line-height:1.8;color:var(--ink-2)">审批时会再次核对活动版本、状态和时间；<br>若活动在申请后已变化，需组织者重新提交。</div>
+      </div>
+    </div>
+
+    <!-- 审核详情 -->
+    <div class="glass strong" style="flex:1.35;padding:22px 24px;border-radius:24px">
+      <div class="row between"><div class="h2">修改申请 · 草坪音乐会 · 秋日限定</div><span class="tag orange">待审核</span></div>
+      <div class="small muted mt8">申请人：文艺部 · 基于版本 v3 · 审核期间活动页仍展示原信息</div>
+      <table class="table mt16 diff">
+        <tr><th style="width:150px">字段</th><th>原内容</th><th>申请内容</th></tr>
+        <tr class="hl"><td>草坪前排区名额</td><td>20</td><td class="new">30 ↑</td></tr>
+        <tr class="hl"><td>地点</td><td>东区大草坪</td><td class="new">西区足球场看台</td></tr>
+        <tr><td>活动时间</td><td>11/05 19:00–21:00</td><td>11/05 19:00–21:00</td></tr>
+        <tr class="hl"><td>报名截止</td><td>11/05 12:00</td><td class="new">11/05 15:00</td></tr>
+        <tr><td>检票开始</td><td>11/05 18:30</td><td>11/05 18:30</td></tr>
+      </table>
+      <div class="glass mt16" style="padding:12px 14px;border-radius:14px;background:rgba(226,248,237,.9);border-color:#a9e8c8">
+        <div class="small" style="color:#0c7a4f;line-height:1.7">✓ 校验通过：名额只增未减；检票开始不晚于活动开始。通过后将按候补顺序递补 6 人。</div>
+      </div>
+      <div class="label mt16">驳回原因（驳回时必填）</div>
+      <div class="field area">请填写驳回原因，原因会显示在组织者的活动管理页</div>
+      <div class="row mt16" style="justify-content:flex-end"><div class="btn ghost-red">驳回</div><div class="btn primary" style="width:160px">通过</div></div>
+    </div>
+  </div>
+</div>
+</body></html>

@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8"><title>界面2 活动广场</title><link rel="stylesheet" href="style.css">
+<style>
+.cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+.card { padding: 0; overflow: hidden; border-radius: 24px; }
+.cover { height: 118px; position: relative; display: flex; align-items: flex-end; padding: 12px 16px; font-size: 34px; }
+.cover .tag { position: absolute; top: 12px; right: 12px; }
+.card .body { padding: 14px 18px 16px; }
+.card .t { font-size: 17px; font-weight: 800; }
+.meta { font-size: 13px; color: var(--ink-2); margin-top: 6px; }
+.bar { height: 6px; border-radius: 3px; background: rgba(255,255,255,0.9); margin-top: 10px; overflow: hidden; }
+.bar i { display: block; height: 100%; border-radius: 3px; background: var(--blue); }
+.star { font-size: 20px; color: #f5b400; }
+.star.off { color: #b6c2d6; }
+</style></head>
+<body>
+<div class="cloud lg" style="left:40px;top:150px"></div>
+<div class="cloud" style="left:1230px;top:130px"></div>
+<div class="cloud sm faint" style="left:700px;top:960px"></div>
+<div class="cloud lg faint" style="left:1300px;top:860px"></div>
+
+<div class="nav glass strong">
+  <div class="logo"><span class="logo-mark">☁</span>活动现场</div>
+  <a class="on">活动广场</a><a>个人中心</a>
+  <div class="grow"></div>
+  <div class="bell">🔔<span class="dot">1</span></div>
+  <div class="avatar">小</div><span class="sub" style="font-weight:600">小雨</span>
+</div>
+
+<!-- 筛选条 -->
+<div class="glass" style="position:absolute;left:24px;right:24px;top:100px;padding:18px 22px">
+  <div class="row" style="gap:12px">
+    <span class="chip on">全部</span><span class="chip">讲座</span><span class="chip">工作坊</span><span class="chip">演出</span><span class="chip">社团</span>
+    <div class="grow"></div>
+    <div class="field" style="width:150px">📅 2026-11-01</div><span class="muted">至</span>
+    <div class="field" style="width:150px">📅 2026-11-30</div>
+    <div class="field" style="width:150px">状态：全部 ▾</div>
+    <div class="field" style="width:220px">🔍 搜索活动名称或关键词</div>
+    <div class="btn primary">搜索</div>
+  </div>
+</div>
+
+<!-- 推荐 -->
+<div class="glass" style="position:absolute;left:24px;top:200px;width:330px;bottom:24px;padding:22px">
+  <img class="mascot" src="mascot.svg" style="right:20px;bottom:70px;width:110px;height:96px">
+  <div class="title h2">本周值得期待 ✨</div>
+  <div class="small muted mt8">按开始时间排序的已发布场次</div>
+  <div class="col mt16" style="gap:14px">
+    <div class="glass strong" style="padding:14px 16px;border-radius:18px">
+      <div class="row between"><span class="tag blue">演出</span><span class="small muted">11/05 周四</span></div>
+      <div class="h3 mt8">草坪音乐会 · 秋日限定</div>
+      <div class="meta">19:00 · 东区大草坪</div>
+    </div>
+    <div class="glass strong" style="padding:14px 16px;border-radius:18px">
+      <div class="row between"><span class="tag purple">讲座</span><span class="small muted">11/06 周五</span></div>
+      <div class="h3 mt8">AI 与未来教育</div>
+      <div class="meta">14:00 · 图书馆报告厅</div>
+    </div>
+    <div class="glass strong" style="padding:14px 16px;border-radius:18px">
+      <div class="row between"><span class="tag green">社团</span><span class="small muted">11/07 周六</span></div>
+      <div class="h3 mt8">星空摄影社开放日</div>
+      <div class="meta">20:00 · 天文台</div>
+    </div>
+  </div>
+  <div class="small muted" style="position:absolute;bottom:20px;left:22px;right:22px;line-height:1.7">切换分类或日期时只刷新右侧列表，<br>保留输入内容和浏览位置。</div>
+</div>
+
+<!-- 列表 -->
+<div style="position:absolute;left:378px;right:24px;top:200px;bottom:24px">
+  <div class="row between" style="margin-bottom:14px">
+    <div class="title h2" style="color:#fff;text-shadow:0 2px 8px rgba(0,60,140,.35)">找到 6 个活动</div>
+    <div class="small" style="color:#fff">排序：未结束优先 · 开始时间 ▾</div>
+  </div>
+  <div class="cards">
+    <div class="glass card strong">
+      <div class="cover" style="background:linear-gradient(135deg,#a9e3ff,#5fb8ff)">🎸<span class="tag green">报名中</span></div>
+      <div class="body"><div class="t">草坪音乐会 · 秋日限定</div><div class="meta">11/05 19:00 · 东区大草坪</div>
+        <div class="row between mt8 small"><span class="muted">剩余名额</span><span><b>12</b> / 200</span></div><div class="bar"><i style="width:94%"></i></div>
+        <div class="row between mt12"><span class="tag blue">演出</span><span class="star">★</span></div></div>
+    </div>
+    <div class="glass card strong">
+      <div class="cover" style="background:linear-gradient(135deg,#ffe1b8,#ffb36b)">🏺<span class="tag orange">已满 · 可候补</span></div>
+      <div class="body"><div class="t">陶艺手作工作坊</div><div class="meta">11/08 10:00 · 艺术楼 201</div>
+        <div class="row between mt8 small"><span class="muted">剩余名额</span><span><b>0</b> / 20 · 候补 4 人</span></div><div class="bar"><i style="width:100%;background:var(--orange)"></i></div>
+        <div class="row between mt12"><span class="tag orange">工作坊</span><span class="star off">☆</span></div></div>
+    </div>
+    <div class="glass card strong">
+      <div class="cover" style="background:linear-gradient(135deg,#d9ccff,#9d86ff)">🎤<span class="tag green">报名中</span></div>
+      <div class="body"><div class="t">校园歌手大赛决赛</div><div class="meta">11/12 18:30 · 大学生活动中心</div>
+        <div class="row between mt8 small"><span class="muted">剩余名额</span><span><b>86</b> / 300</span></div><div class="bar"><i style="width:71%"></i></div>
+        <div class="row between mt12"><span class="tag blue">演出</span><span class="star off">☆</span></div></div>
+    </div>
+    <div class="glass card strong">
+      <div class="cover" style="background:linear-gradient(135deg,#c4f2de,#5fd3a2)">🎻<span class="tag blue">进行中</span></div>
+      <div class="body"><div class="t">弦乐四重奏午间音乐会</div><div class="meta">11/01 12:00 · 音乐厅（共 3 场）</div>
+        <div class="row between mt8 small"><span class="muted">下一场剩余</span><span><b>40</b> / 120</span></div><div class="bar"><i style="width:67%"></i></div>
+        <div class="row between mt12"><span class="tag blue">演出</span><span class="star">★</span></div></div>
+    </div>
+    <div class="glass card strong dim">
+      <div class="cover" style="background:linear-gradient(135deg,#dfe6f0,#b9c6d8)">🎹<span class="tag gray">已结束</span></div>
+      <div class="body"><div class="t">钢琴社秋季音乐分享</div><div class="meta">10/25 19:00 · 琴房</div>
+        <div class="row between mt8 small"><span class="muted">评分</span><span><b>4.6</b> ★ · 38 人评价</span></div><div class="bar"><i style="width:100%;background:var(--gray)"></i></div>
+        <div class="row between mt12"><span class="tag gray">演出</span><span class="star off">☆</span></div></div>
+    </div>
+    <div class="glass card strong dim">
+      <div class="cover" style="background:linear-gradient(135deg,#ffd6d8,#f59ca0)">🎺<span class="tag red">已取消</span></div>
+      <div class="body"><div class="t">管乐团户外快闪</div><div class="meta">10/30 16:00 · 中心广场</div>
+        <div class="row between mt8 small"><span class="muted">取消原因</span><span>天气原因</span></div><div class="bar"><i style="width:0"></i></div>
+        <div class="row between mt12"><span class="tag gray">演出</span><span class="star off">☆</span></div></div>
+    </div>
+  </div>
+</div>
+</body></html>

@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8"><title>界面10 平台统计与操作日志</title><link rel="stylesheet" href="style.css">
+<style>
+.stats { display: grid; grid-template-columns: repeat(5, 1fr); gap: 14px; }
+.bars { display: flex; align-items: flex-end; gap: 18px; height: 92px; padding: 0 6px; }
+.bars div { flex: 1; border-radius: 10px 10px 4px 4px; background: linear-gradient(180deg, #5cc3ff, var(--blue)); position: relative; }
+.bars span { position: absolute; bottom: -22px; left: 0; right: 0; text-align: center; font-size: 12px; color: var(--ink-3); }
+</style></head>
+<body>
+<div class="cloud lg faint" style="left:1320px;top:120px"></div>
+
+<div class="nav glass strong">
+  <div class="logo"><span class="logo-mark">☁</span>活动现场</div>
+  <a>活动广场</a><a class="on">平台管理</a>
+  <div class="grow"></div>
+  <div class="bell">🔔</div>
+  <div class="avatar" style="background:linear-gradient(135deg,#ffe0b3,#c9e6ff)">管</div><span class="sub" style="font-weight:600">平台管理员</span>
+</div>
+
+<div class="side glass">
+  <div class="item">🗂 待审核 <span class="badge">3</span></div>
+  <div class="item">🌐 全部活动</div>
+  <div class="item on">📊 平台统计</div>
+  <div class="item">🧾 操作日志</div>
+  <img class="mascot" src="mascot.svg" style="left:50px;bottom:22px;width:110px;height:96px">
+</div>
+
+<div class="main">
+  <div class="row between">
+    <div class="title h1" style="color:#fff;text-shadow:0 2px 10px rgba(0,60,140,.35)">平台统计与操作日志</div>
+    <div class="field filled" style="width:240px;background:#fff">📅 2026-10-01 至 2026-10-31</div>
+  </div>
+
+  <div class="row mt16" style="gap:14px;align-items:stretch">
+    <div class="stats" style="flex:1.6">
+      <div class="glass strong stat"><div class="small muted">活动数</div><div class="num">42</div><div class="small muted">已发布 31 · 待审 3</div></div>
+      <div class="glass strong stat"><div class="small muted">占用名额</div><div class="num" style="color:var(--blue)">3,186</div><div class="small muted">总容量 4,020</div></div>
+      <div class="glass strong stat"><div class="small muted">候补人数</div><div class="num" style="color:var(--orange)">127</div><div class="small muted">已递补 58</div></div>
+      <div class="glass strong stat"><div class="small muted">签到人数</div><div class="num" style="color:var(--green)">2,415</div><div class="small muted">缺席 312</div></div>
+      <div class="glass strong stat"><div class="small muted">签到率</div><div class="num">75.8<small>%</small></div><div class="small muted">已签到 ÷ 占用</div></div>
+    </div>
+    <div class="glass strong" style="flex:1;padding:16px 18px 34px;border-radius:20px">
+      <div class="small muted">各分类占用名额</div>
+      <div class="bars mt8" style="height:76px"><div style="height:90%"><span>演出</span></div><div style="height:62%"><span>讲座</span></div><div style="height:40%"><span>工作坊</span></div><div style="height:28%"><span>社团</span></div></div>
+    </div>
+  </div>
+
+  <div class="glass strong mt16" style="padding:18px 20px;border-radius:22px">
+    <div class="row between">
+      <div class="h3">操作日志 <span class="muted small">· 关键写操作均记录，个人清理不会删除日志</span></div>
+      <div class="row"><div class="field" style="width:150px;height:36px">操作者：全部 ▾</div><div class="field" style="width:150px;height:36px">动作：全部 ▾</div><div class="field" style="width:190px;height:36px">🔍 活动或对象编号</div><div class="btn primary sm">查询</div></div>
+    </div>
+    <table class="table mt12">
+      <tr><th>时间</th><th>操作者</th><th>动作</th><th>对象</th><th>所属活动</th><th>结果</th></tr>
+      <tr><td>10/31 10:20</td><td>管理员</td><td>审核修改申请</td><td>修改申请 #58</td><td>草坪音乐会 · 秋日限定</td><td><span class="tag green">通过</span></td></tr>
+      <tr><td>10/31 10:20</td><td>系统</td><td>候补递补</td><td>报名 R-10288</td><td>草坪音乐会 · 秋日限定</td><td><span class="tag green">成功</span></td></tr>
+      <tr><td>10/31 09:58</td><td>小雨</td><td>退票</td><td>报名 R-10231</td><td>草坪音乐会 · 秋日限定</td><td><span class="tag green">成功</span></td></tr>
+      <tr><td>10/31 09:41</td><td>阿杰</td><td>检票</td><td>票 TK-77C1-0A3E</td><td>弦乐四重奏午间音乐会</td><td><span class="tag orange">重复，返回首次结果</span></td></tr>
+      <tr><td>10/31 09:30</td><td>小鹿</td><td>报名</td><td>报名 R-10301</td><td>陶艺手作工作坊</td><td><span class="tag orange">进入候补</span></td></tr>
+      <tr><td>10/30 22:00</td><td>系统</td><td>标记缺席</td><td>场次 #12</td><td>钢琴社秋季音乐分享</td><td><span class="tag green">14 条</span></td></tr>
+      <tr><td>10/30 16:02</td><td>管理员</td><td>取消活动</td><td>活动 #27</td><td>管乐团户外快闪</td><td><span class="tag green">成功 · 清空候补 8 人</span></td></tr>
+    </table>
+    <div class="row between mt12 small muted"><span>共 1,284 条</span><span>‹ 1 2 3 … 65 ›</span></div>
+  </div>
+</div>
+</body></html>

@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8"><title>界面3 活动详情与报名</title><link rel="stylesheet" href="style.css">
+<style>
+.opt { padding: 12px 14px; border-radius: 16px; background: rgba(255,255,255,0.7); border: 1.5px solid #fff; display: flex; align-items: center; gap: 10px; font-size: 14px; }
+.opt.on { border-color: var(--blue); background: #f2f9ff; box-shadow: 0 0 0 3px rgba(10,140,240,0.12); }
+.radio { width: 18px; height: 18px; border-radius: 50%; border: 2px solid #b6c2d6; flex: none; }
+.opt.on .radio { border: 5px solid var(--blue); }
+.cmt { padding: 14px 0; border-bottom: 1px solid rgba(255,255,255,0.85); }
+.cmt .who { font-weight: 700; }
+.cmt .txt { margin-top: 6px; line-height: 1.6; color: var(--ink); }
+.cmt .ops { margin-top: 6px; font-size: 12px; color: var(--ink-3); display: flex; gap: 18px; }
+.reply { margin-left: 46px; padding: 10px 14px; border-radius: 14px; background: rgba(255,255,255,0.6); margin-top: 8px; }
+.ava { width: 34px; height: 34px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 800; color: #fff; flex: none; }
+.stars { font-size: 26px; letter-spacing: 4px; color: #f5b400; }
+.stars .off { color: #c6d1e2; }
+</style></head>
+<body>
+<div class="cloud lg" style="left:1310px;top:140px"></div>
+<div class="cloud faint" style="left:520px;top:960px"></div>
+
+<div class="nav glass strong">
+  <div class="logo"><span class="logo-mark">☁</span>活动现场</div>
+  <a class="on">活动广场</a><a>个人中心</a>
+  <div class="grow"></div>
+  <div class="bell">🔔<span class="dot">1</span></div>
+  <div class="avatar">小</div><span class="sub" style="font-weight:600">小雨</span>
+</div>
+
+<!-- 左：活动信息、评分、评论 -->
+<div class="glass" style="position:absolute;left:24px;top:100px;width:900px;bottom:24px;padding:26px 30px;overflow:hidden">
+  <div class="small muted">活动广场 › 演出</div>
+  <div class="row mt12" style="gap:14px">
+    <div class="title h1">草坪音乐会 · 秋日限定</div><span class="tag green">报名中</span>
+  </div>
+  <div class="row mt12 sub" style="gap:22px;font-size:14px">
+    <span>🎤 主办：校学生会文艺部 <span class="tag purple" style="margin-left:4px">活动官方</span></span>
+    <span>📍 东区大草坪</span><span>🗓 11/05、11/06 共 2 场</span>
+  </div>
+  <div class="mt16" style="line-height:1.8;color:var(--ink-2);font-size:14px">带上野餐垫，在秋天的晚风里听一场户外音乐会。乐队、民谣与合唱轮番登场，现场提供热饮。请凭正式票码入场，候补凭证不能入场。</div>
+
+  <div class="row mt20" style="gap:16px;align-items:stretch">
+    <div class="glass strong" style="padding:16px 20px;border-radius:20px;width:260px">
+      <div class="small muted">活动评分</div>
+      <div class="row" style="align-items:baseline;gap:8px"><span style="font-size:40px;font-weight:800">4.6</span><span class="stars" style="font-size:18px">★★★★★</span></div>
+      <div class="small muted">38 人评价 · 平均分保留一位小数</div>
+    </div>
+    <div class="glass strong" style="padding:16px 20px;border-radius:20px;flex:1">
+      <div class="small muted">我的评分</div>
+      <div class="stars mt8"><span class="off">★★★★★</span></div>
+      <div class="small muted mt8">🕒 活动结束后可评分（1～5 星）</div>
+    </div>
+  </div>
+
+  <div class="row between mt20"><div class="h2">讨论区 <span class="muted" style="font-size:14px;font-weight:600">· 26 条</span></div><span class="small muted">最新 ▾</span></div>
+  <div class="row mt12" style="gap:10px">
+    <div class="field grow">说点什么吧，游客也可以参与讨论～</div>
+    <div class="btn primary">发表</div>
+  </div>
+
+  <div class="cmt">
+    <div class="row"><div class="ava" style="background:#7cc4ff">林</div><span class="who">林同学</span><span class="tag green">已出席</span><span class="small muted">· 2 小时前</span></div>
+    <div class="txt" style="margin-left:44px">去年的草坪音乐会超棒！建议早点到占前排位置，记得带外套，晚上风有点大。</div>
+    <div class="ops" style="margin-left:44px"><span style="color:var(--blue);font-weight:700">👍 24</span><span>💬 回复</span></div>
+    <div class="reply">
+      <div class="row"><div class="ava" style="background:#b39dff;width:26px;height:26px;font-size:12px">文</div><span class="who">文艺部小周</span><span class="tag purple">活动官方</span><span class="small muted">回复 林同学 · 1 小时前</span></div>
+      <div class="txt" style="margin-left:36px">今年现场会提供免费热饮，入口在东区南门 ☕</div>
+    </div>
+  </div>
+  <div class="cmt" style="border:none">
+    <div class="row"><div class="ava" style="background:#c3cddc">游</div><span class="who">路过的云朵</span><span class="tag gray">游客</span><span class="small muted">· 35 分钟前</span></div>
+    <div class="txt" style="margin-left:44px">校外人员可以来听吗？</div>
+    <div class="ops" style="margin-left:44px"><span>👍 3</span><span>💬 回复</span></div>
+  </div>
+</div>
+
+<!-- 右：报名面板 -->
+<div class="glass strong" style="position:absolute;left:948px;right:24px;top:100px;bottom:24px;padding:26px 26px">
+  <img class="mascot" src="mascot.svg" style="right:22px;bottom:18px;width:104px;height:90px">
+  <div class="title h2">选择场次与票种</div>
+
+  <div class="label mt16">场次</div>
+  <div class="col" style="gap:8px">
+    <div class="opt on"><span class="radio"></span><div class="grow"><b>11/05 周四 19:00–21:00</b><div class="small muted">东区大草坪</div></div></div>
+    <div class="opt"><span class="radio"></span><div class="grow"><b>11/06 周五 19:00–21:00</b><div class="small muted">东区大草坪</div></div></div>
+  </div>
+
+  <div class="label mt16">票种</div>
+  <div class="col" style="gap:8px">
+    <div class="opt on"><span class="radio"></span><div class="grow"><b>普通观众票</b></div><span class="small">剩 <b style="color:var(--blue)">12</b> / 180</span></div>
+    <div class="opt"><span class="radio"></span><div class="grow"><b>草坪前排区</b></div><span class="tag orange">已满 · 可候补</span></div>
+  </div>
+
+  <div class="btn primary block mt20" style="height:52px;font-size:17px">立即报名</div>
+  <div class="row mt12" style="gap:10px">
+    <div class="btn ghost grow" style="color:#e0a200">★ 已收藏</div>
+    <div class="btn ghost grow">分享</div>
+  </div>
+
+  <div class="glass" style="margin-top:18px;padding:14px 16px;border-radius:18px;background:rgba(255,255,255,.55)">
+    <div class="small" style="line-height:2;color:var(--ink-2)">
+      <div class="row between"><span>报名截止</span><b>11/05 12:00</b></div>
+      <div class="row between"><span>退票截止</span><b>检票开始前</b></div>
+      <div class="row between"><span>检票开始</span><b>11/05 18:30</b></div>
+    </div>
+  </div>
+
+  <div class="label mt16">按钮会随状态变化</div>
+  <div class="col" style="gap:8px">
+    <div class="btn warn block sm">加入候补（名额已满）</div>
+    <div class="btn ghost block sm" style="color:var(--gray)">已报名，查看票券</div>
+    <div class="btn disabled block sm">报名已截止</div>
+  </div>
+</div>
+</body></html>

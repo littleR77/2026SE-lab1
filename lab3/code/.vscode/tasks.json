@@ -1,0 +1,33 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "构建",
+      "type": "shell",
+      "command": "cmake --preset mingw-debug && cmake --build --preset mingw-debug",
+      "group": {"kind": "build", "isDefault": true},
+      "problemMatcher": ["$gcc"]
+    },
+    {
+      "label": "运行程序",
+      "type": "shell",
+      "command": "${workspaceFolder}/build/debug/ticketing_app.exe",
+      "dependsOn": "构建",
+      "problemMatcher": []
+    },
+    {
+      "label": "运行测试",
+      "type": "shell",
+      "command": "ctest --preset mingw-debug",
+      "dependsOn": "构建",
+      "group": "test",
+      "problemMatcher": []
+    },
+    {
+      "label": "代码风格检查（cpplint）",
+      "type": "shell",
+      "command": "python -m cpplint --recursive src tests",
+      "problemMatcher": []
+    }
+  ]
+}

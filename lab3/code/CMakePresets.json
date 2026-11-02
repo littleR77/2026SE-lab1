@@ -1,0 +1,38 @@
+{
+  "version": 3,
+  "configurePresets": [
+    {
+      "name": "mingw-debug",
+      "displayName": "MinGW g++ · Debug",
+      "generator": "Ninja",
+      "binaryDir": "${sourceDir}/build/debug",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug",
+        "CMAKE_C_COMPILER": "gcc",
+        "CMAKE_CXX_COMPILER": "g++"
+      }
+    },
+    {
+      "name": "mingw-release",
+      "displayName": "MinGW g++ · Release",
+      "generator": "Ninja",
+      "binaryDir": "${sourceDir}/build/release",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Release",
+        "CMAKE_C_COMPILER": "gcc",
+        "CMAKE_CXX_COMPILER": "g++"
+      }
+    }
+  ],
+  "buildPresets": [
+    {"name": "mingw-debug", "configurePreset": "mingw-debug"},
+    {"name": "mingw-release", "configurePreset": "mingw-release"}
+  ],
+  "testPresets": [
+    {
+      "name": "mingw-debug",
+      "configurePreset": "mingw-debug",
+      "output": {"outputOnFailure": true}
+    }
+  ]
+}

@@ -19,7 +19,8 @@ class AccountService {
       : store_(store), audit_(audit) {}
 
   // 注册账号。自行注册的账号只能是参与者；平台创建其他角色时 role 可指定。
-  // 前置条件：账号 3～20 位字母数字、未被占用；显示名非空；密码至少 6 位。
+  // 前置条件：账号为 3～20 位字母、数字或下划线且未被占用；显示名非空；
+  //           密码至少 6 位。
   // 结果：成功时 *out_id 为新用户编号，密码只保存哈希。
   Status Register(const std::string& account, const std::string& display_name,
                   const std::string& password, Role role, Id* out_id);

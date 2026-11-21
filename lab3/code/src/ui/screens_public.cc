@@ -413,10 +413,12 @@ void App::DrawActivityCard(const Activity& activity, float width) {
   ImGui::PopTextWrapPos();
   const std::vector<EventSession*> sessions =
       sys_->store.SessionsOf(activity.id);
+  // 显示最近一个还没结束的场次，避免多场次活动在首场结束后仍显示旧日期。
+  const EventSession* shown = NextSession(activity.id);
+  if (shown == nullptr && !sessions.empty()) shown = sessions.front();
   std::string when;
-  if (!sessions.empty()) {
-    when = FormatShort(sessions.front()->start_at) + " · " +
-           sessions.front()->location;
+  if (shown != nullptr) {
+    when = FormatShort(shown->start_at) + " · " + shown->location;
     if (sessions.size() > 1) {
       when += "（共 " + std::to_string(sessions.size()) + " 场）";
     }
@@ -546,16 +548,21 @@ void App::DrawComments(const Activity& activity) {
     ImGui::SameLine();
   }
   ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x - Px(80));
-  ImGui::InputTextWithHint("##comment", "说点什么吧，游客也可以参与讨论～",
-                           comment_, sizeof(comment_));
+  // 按回车与点击“发表”效果相同。
+  const bool comment_enter = ImGui::InputTextWithHint(
+      "##comment", "说点什么吧，游客也可以参与讨论～（回车发表）", comment_,
+      sizeof(comment_), ImGuiInputTextFlags_EnterReturnsTrue);
   ImGui::SameLine();
-  if (FilledButton("发表", Tone::kBlue, ImVec2(Px(70), 0))) {
+  if (FilledButton("发表", Tone::kBlue, ImVec2(Px(70), 0)) || comment_enter) {
     const Status status = sys_->comments.Post(actor_, activity.id, 0,
                                               guest_name_, comment_, nullptr);
     if (status.ok()) comment_[0] = '\0';
     ShowResult(status);
   }
 
+  // 发表回复会向评论表追加元素，可能使表重新分配内存，令循环中持有的
+  // 评论指针失效。因此循环里只记下要回复的评论，等遍历结束后再发表。
+  Id reply_parent = 0;
   ImGui::BeginChild("comments", ImVec2(0, 0));
   for (const Comment* comment : sys_->comments.TopLevel(activity.id)) {
     std::vector<const Comment*> thread = {comment};
@@ -590,8 +597,9 @@ void App::DrawComments(const Activity& activity) {
       ImGui::SameLine();
       ImGui::PushFont(nullptr, 13.0f);
       std::string meta = "· " + FormatShort(item->created_at);
-      if (is_reply) {
-        const Comment* parent = sys_->store.FindComment(item->parent_id);
+      const Comment* parent =
+          is_reply ? sys_->store.FindComment(item->parent_id) : nullptr;
+      if (parent != nullptr) {
         meta += " 回复 " + (parent->user_id == 0
                                 ? parent->guest_name
                                 : sys_->accounts.NameOf(parent->user_id));
@@ -616,16 +624,14 @@ void App::DrawComments(const Activity& activity) {
       ImGui::PopFont();
       if (reply_to_ == item->id) {
         ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x - Px(80));
-        ImGui::InputTextWithHint("##reply", ("回复 " + name).c_str(), reply_,
-                                 sizeof(reply_));
+        const bool reply_enter = ImGui::InputTextWithHint(
+            "##reply", ("回复 " + name + "（回车发送）").c_str(), reply_,
+            sizeof(reply_), ImGuiInputTextFlags_EnterReturnsTrue);
         ImGui::SameLine();
-        if (FilledButton("回复##send", Tone::kBlue, ImVec2(Px(70), 0))) {
+        if (FilledButton("回复##send", Tone::kBlue, ImVec2(Px(70), 0)) ||
+            reply_enter) {
           // 回复挂在顶层评论下面，便于阅读。
-          const Id parent = item->parent_id == 0 ? item->id : item->parent_id;
-          const Status status = sys_->comments.Post(
-              actor_, activity.id, parent, guest_name_, reply_, nullptr);
-          if (status.ok()) reply_to_ = 0;
-          ShowResult(status);
+          reply_parent = item->parent_id == 0 ? item->id : item->parent_id;
         }
       }
       ImGui::EndGroup();
@@ -636,6 +642,12 @@ void App::DrawComments(const Activity& activity) {
     ImGui::Separator();
   }
   ImGui::EndChild();
+  if (reply_parent != 0) {
+    const Status status = sys_->comments.Post(actor_, activity.id, reply_parent,
+                                              guest_name_, reply_, nullptr);
+    if (status.ok()) reply_to_ = 0;
+    ShowResult(status);
+  }
 }
 
 void App::DrawRegisterPanel(const Activity& activity, float width,

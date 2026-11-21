@@ -219,6 +219,8 @@ void App::DrawMessages(ImVec2 size) {
   const std::vector<const Favorite*> favorites =
       sys_->favorites.ListMine(actor_);
   if (favorites.empty()) Muted("还没有收藏活动。");
+  // 取消收藏会从收藏表删除元素，使后面的指针错位，所以遍历结束后再删除。
+  Id remove_id = 0;
   for (const Favorite* favorite : favorites) {
     const Activity* activity = sys_->store.FindActivity(favorite->activity_id);
     if (activity == nullptr) continue;
@@ -233,20 +235,22 @@ void App::DrawMessages(ImVec2 size) {
     ImGui::PushFont(nullptr, 13.0f);
     const std::vector<EventSession*> sessions =
         sys_->store.SessionsOf(activity->id);
+    const EventSession* shown = NextSession(activity->id);
+    if (shown == nullptr && !sessions.empty()) shown = sessions.front();
     Muted(("收藏于 " + FormatShort(favorite->created_at) +
-           (sessions.empty() ? std::string()
-                             : " · 活动 " +
-                                   FormatShort(sessions.front()->start_at)))
+           (shown == nullptr ? std::string()
+                             : " · 活动 " + FormatShort(shown->start_at)))
               .c_str());
     ImGui::PopFont();
     if (GhostButton("查看详情")) OpenDetail(activity->id);
     ImGui::SameLine();
-    if (GhostButton("取消收藏")) {
-      ShowResult(sys_->favorites.Remove(actor_, activity->id));
-    }
+    if (GhostButton("取消收藏")) remove_id = activity->id;
     EndCard();
     if (closed) ImGui::PopStyleVar();
     ImGui::PopID();
+  }
+  if (remove_id != 0) {
+    ShowResult(sys_->favorites.Remove(actor_, remove_id));
   }
   EndCard();
 }

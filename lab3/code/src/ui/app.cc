@@ -134,14 +134,26 @@ int App::Remaining(Id activity_id) const {
 }
 
 int App::Capacity(Id activity_id) const {
+  // 和 Remaining 口径一致：还有未结束的场次时，只统计这些场次；
+  // 全部结束后才统计全部场次，用于展示已结束活动的规模。
+  const bool any_live = NextSession(activity_id) != nullptr;
   int total = 0;
   for (const EventSession* session : sys_->store.SessionsOf(activity_id)) {
-    if (session->cancelled) continue;
+    if (session->cancelled || (any_live && session->finished)) continue;
     for (const TicketType* type : sys_->store.TicketTypesOf(session->id)) {
       if (!type->cancelled) total += type->capacity;
     }
   }
   return total;
+}
+
+const EventSession* App::NextSession(Id activity_id) const {
+  const EventSession* next = nullptr;
+  for (const EventSession* session : sys_->store.SessionsOf(activity_id)) {
+    if (session->cancelled || session->finished) continue;
+    if (next == nullptr || session->start_at < next->start_at) next = session;
+  }
+  return next;
 }
 
 void App::FavoriteStar(Id activity_id) {

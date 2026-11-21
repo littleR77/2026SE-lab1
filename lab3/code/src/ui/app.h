@@ -119,6 +119,8 @@ class App {
   std::string SessionText(const EventSession& session) const;
   int Remaining(Id activity_id) const;
   int Capacity(Id activity_id) const;
+  // 最近一个未取消、未结束的场次；全部结束时返回 nullptr。
+  const EventSession* NextSession(Id activity_id) const;
   void FavoriteStar(Id activity_id);
 
   System* sys_;

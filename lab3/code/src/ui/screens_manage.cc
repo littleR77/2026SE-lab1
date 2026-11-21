@@ -469,10 +469,13 @@ void App::DrawChangeRequest(const Activity& activity, float left) {
     EndCard();
     return;
   }
-  // 最近一次被驳回的申请。
+  // 最近一次被驳回或失效的申请。
   for (const ChangeRequest& c : sys_->store.data().change_requests) {
     if (c.activity_id == activity.id && c.status == ChangeStatus::kRejected) {
       RedText("上次修改申请被驳回：" + c.reason);
+    } else if (c.activity_id == activity.id &&
+               c.status == ChangeStatus::kExpired) {
+      RedText("上次修改申请已失效：" + c.reason);
     }
   }
   const std::vector<EventSession*> sessions =
@@ -930,10 +933,13 @@ void App::DrawReview(ImVec2 size) {
         review_id_ = 0;
       }
       ImGui::SetNextItemWidth(right - Px(200));
-      ImGui::InputTextWithHint("##reason", "驳回原因（驳回时必填）",
-                               review_reason_, sizeof(review_reason_));
+      // 在驳回原因框按回车等同点击“驳回”。
+      const bool reject_enter = ImGui::InputTextWithHint(
+          "##reason", "驳回原因（驳回时必填）", review_reason_,
+          sizeof(review_reason_), ImGuiInputTextFlags_EnterReturnsTrue);
       ImGui::SameLine();
-      if (FilledButton("驳回", Tone::kRed, ImVec2(Px(120), 0))) {
+      if (FilledButton("驳回", Tone::kRed, ImVec2(Px(120), 0)) ||
+          reject_enter) {
         const Status status =
             sys_->reviews.Reject(actor_, a->id, review_reason_);
         if (status.ok()) {
@@ -1015,6 +1021,19 @@ void App::DrawReview(ImVec2 size) {
       ImGui::TextUnformatted(checkin_ok ? "√ 检票开始不晚于活动开始"
                                         : "× 检票开始晚于活动开始");
       ImGui::PopStyleColor();
+      // 场次已开始/结束/取消等情况下申请再也无法通过，只提供关闭。
+      const std::string blocker = sys_->reviews.ChangeBlocker(*c);
+      if (!blocker.empty()) {
+        RedText("该申请已无法通过：" + blocker +
+                "。关闭后会标记为“已失效”，组织者可以看到原因。");
+        ImGui::Dummy(ImVec2(0, Px(6)));
+        if (FilledButton("关闭申请", Tone::kRed, ImVec2(Px(140), Px(42)))) {
+          ShowResult(sys_->reviews.ExpireChange(actor_, c->id));
+          review_id_ = 0;
+        }
+        EndCard();
+        return;
+      }
       const int promote = sys_->reviews.EstimatePromotion(*c);
       Muted(("通过后将按顺序递补 " + std::to_string(promote) +
              " 名候补；审批时会再次核对活动版本，防止覆盖已变化的数据。")
@@ -1026,10 +1045,12 @@ void App::DrawReview(ImVec2 size) {
         review_id_ = 0;
       }
       ImGui::SetNextItemWidth(right - Px(200));
-      ImGui::InputTextWithHint("##reason", "驳回原因（驳回时必填）",
-                               review_reason_, sizeof(review_reason_));
+      const bool reject_enter = ImGui::InputTextWithHint(
+          "##reason", "驳回原因（驳回时必填）", review_reason_,
+          sizeof(review_reason_), ImGuiInputTextFlags_EnterReturnsTrue);
       ImGui::SameLine();
-      if (FilledButton("驳回", Tone::kRed, ImVec2(Px(120), 0))) {
+      if (FilledButton("驳回", Tone::kRed, ImVec2(Px(120), 0)) ||
+          reject_enter) {
         const Status status =
             sys_->reviews.RejectChange(actor_, c->id, review_reason_);
         if (status.ok()) {

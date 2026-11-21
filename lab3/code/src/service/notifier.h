@@ -6,6 +6,7 @@
 #include <string>
 #include <vector>
 
+#include "common/status.h"
 #include "common/time_util.h"
 #include "data/store.h"
 #include "domain/model.h"
@@ -20,11 +21,13 @@ class Notifier {
   bool Notify(Id user_id, Id registration_id, const std::string& type,
               const std::string& content, const std::string& event_key);
 
-  // 本人消息，按时间倒序。游客返回空列表。
+  // 本人未删除的消息，按时间倒序。游客返回空列表。
   std::vector<const Message*> ListMine(const Actor& actor) const;
   int UnreadCount(const Actor& actor) const;
   // 把本人全部消息标为已读。
   void MarkAllRead(const Actor& actor);
+  // 删除本人的一条已读消息。未读消息不能删除，避免漏看重要通知。
+  Status Delete(const Actor& actor, Id message_id);
 
  private:
   Store* store_;

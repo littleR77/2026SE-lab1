@@ -19,7 +19,14 @@ enum class Role { kGuest, kParticipant, kOrganizer, kChecker, kAdmin };
 
 // M2/M3：活动状态与修改申请状态。
 enum class ActivityStatus { kDraft, kPending, kPublished, kEnded, kCancelled };
-enum class ChangeStatus { kPending, kApproved, kRejected, kWithdrawn };
+// kExpired：场次已开始/结束/取消或活动已非发布状态，申请再也无法通过。
+enum class ChangeStatus {
+  kPending,
+  kApproved,
+  kRejected,
+  kWithdrawn,
+  kExpired
+};
 
 // M5：报名记录的 6 种状态（实验一核心状态表）。
 enum class RegStatus {
@@ -147,6 +154,8 @@ struct Message {
   std::string event_key;  // 唯一，防止同一事件重复通知
   bool read = false;
   Time created_at = 0;
+  // 用户删除后只做标记、不再显示；记录保留，事件键仍用于去重。
+  bool deleted = false;
 };
 
 struct Comment {

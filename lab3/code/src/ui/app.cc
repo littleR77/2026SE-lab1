@@ -239,13 +239,25 @@ void App::DrawNav(float width) {
                           FormatTime(sys_->clock.Now()).substr(5, 5) + " " +
                           WeekdayName(sys_->clock.Now()) + " " +
                           FormatTime(sys_->clock.Now()).substr(11);
-  const float right_width = Px(560);
+  const float right_width = Px(700);
   ImGui::SetCursorPos(ImVec2(width - right_width, Px(18)));
   ImGui::PushStyleColor(ImGuiCol_Text, ToneColor(Tone::kBlue));
   ImGui::TextUnformatted(now.c_str());
   ImGui::PopStyleColor();
+  // 调试用：往回拨时间，只改时钟，不撤销已经发生的处理。
+  const char* rewind_note = "（调试用，已发生的截止、缺席等处理不会撤销）";
   ImGui::SameLine();
   ImGui::SetCursorPosY(Px(13));
+  if (GhostButton("-1 天")) {
+    sys_->RewindClock(kMinutesPerDay);
+    ShowResult(Status::Ok(std::string("时间倒回 1 天") + rewind_note));
+  }
+  ImGui::SameLine(0, Px(6));
+  if (GhostButton("-1 小时")) {
+    sys_->RewindClock(kMinutesPerHour);
+    ShowResult(Status::Ok(std::string("时间倒回 1 小时") + rewind_note));
+  }
+  ImGui::SameLine(0, Px(6));
   if (GhostButton("+1 小时")) {
     const SchedulerReport r = sys_->AdvanceClock(kMinutesPerHour);
     ShowResult(Status::Ok("时间推进 1 小时；候补失效 " +

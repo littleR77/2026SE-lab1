@@ -36,6 +36,9 @@ class System {
   Status Persist();
   // 推进模拟时钟并运行定时调度。
   SchedulerReport AdvanceClock(Time minutes);
+  // 调试用：把模拟时钟往回拨。只改时间，不运行调度，也不撤销已经发生的
+  // 处理（如候补失效、缺席、活动结束）。
+  void RewindClock(Time minutes);
 
   // 写入演示数据：账号、各种状态的活动、报名、评论和评分。
   void Seed();

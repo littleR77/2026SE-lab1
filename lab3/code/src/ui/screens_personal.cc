@@ -87,8 +87,21 @@ void App::DrawTickets(ImVec2 size) {
       ImGui::EndGroup();
     } else if (ticket != nullptr) {
       Muted("票码");
+      const float code_y = ImGui::GetCursorPosY();
       Heading(ticket->code.c_str(), 26);
+      // 票码后面放一个“复制”按钮，写入系统剪贴板，与票码垂直居中。
+      const float code_height = ImGui::GetItemRectSize().y;
+      ImGui::SameLine(0, Px(10));
+      ImGui::PushFont(nullptr, 13.0f);
+      ImGui::SetCursorPosY(code_y +
+                           (code_height - ImGui::GetFrameHeight()) * 0.5f);
+      if (GhostButton("复制")) {
+        ImGui::SetClipboardText(ticket->code.c_str());
+        ShowResult(Status::Ok("票码已复制"));
+      }
+      ImGui::PopFont();
       ImGui::SameLine(card_width - Px(170));
+      ImGui::SetCursorPosY(code_y);
       ImGui::BeginGroup();
       const Checkin* checkin = sys_->store.FindCheckin(ticket->code);
       if (checkin != nullptr) {
@@ -125,6 +138,11 @@ void App::DrawTickets(ImVec2 size) {
       if (GhostButton("清理", ImVec2(Px(90), 0))) {
         ShowResult(sys_->registrations.Hide(actor_, reg.id));
       }
+    } else if (reg.status == RegStatus::kCheckedIn) {
+      Muted("已完成签到，祝你玩得开心");
+    } else {
+      // 上面移动过光标，这一行必须至少提交一个元素，否则 ImGui 会断言失败。
+      ImGui::Dummy(ImVec2(0, 0));
     }
 
     if (ImGui::BeginPopupModal("确认退票", nullptr,
@@ -195,12 +213,20 @@ void App::DrawMessages(ImVec2 size) {
   for (const Message* message : messages) {
     ImGui::PushID(static_cast<int>(message->id));
     BeginCard("msg", ImVec2(0, 0), message->read ? 0.7f : 0.95f);
+    const float row_right =
+        ImGui::GetCursorPosX() + ImGui::GetContentRegionAvail().x;
     Tag(message->type.c_str(), MessageTone(message->type));
     ImGui::SameLine();
     Muted(FormatShort(message->created_at).c_str());
     if (!message->read) {
       ImGui::SameLine();
       Tag("未读", Tone::kRed);
+    } else {
+      // 已读消息右上角可以删除（只做标记，不影响列表遍历）。
+      ImGui::SameLine(row_right - Px(28));
+      if (TrashButton("delete", Px(28), "删除这条消息")) {
+        ShowResult(sys_->notifier.Delete(actor_, message->id));
+      }
     }
     ImGui::TextWrapped("%s", message->content.c_str());
     EndCard();
@@ -271,10 +297,10 @@ void App::DrawCheckin(ImVec2 size) {
   const std::vector<const EventSession*> sessions =
       sys_->checkins.AssignedSessions(actor_);
   BeginCard("form", ImVec2(width, 0), 0.62f);
-  Muted("当前场次（仅显示已授权场次）");
+  Muted("当前场次（仅显示已授权且未结束的场次）");
   if (sessions.empty()) {
-    Muted("你还没有被分配任何场次。发布活动不会自动授予检票权限，"
-          "请联系组织者分配。");
+    Muted("当前没有可检票的场次。已结束的场次不再显示；新场次需要组织者"
+          "分配检票权限。");
     EndCard();
     ImGui::EndGroup();
     return;
@@ -284,14 +310,9 @@ void App::DrawCheckin(ImVec2 size) {
     if (s->id == checkin_session_) found = true;
   }
   if (!found) {
-    // 默认选正在检票或即将开始的场次，都结束时选第一个。
+    // 列表已按开始时间排序且不含已结束场次，默认选最早的一个。
     checkin_session_ = sessions.front()->id;
-    for (const EventSession* s : sessions) {
-      if (s->end_at > sys_->clock.Now()) {
-        checkin_session_ = s->id;
-        break;
-      }
-    }
+    checkin_history_.clear();
   }
   const EventSession* session = sys_->store.FindSession(checkin_session_);
   const Activity* activity = sys_->store.FindActivity(session->activity_id);
@@ -326,6 +347,8 @@ void App::DrawCheckin(ImVec2 size) {
   const bool enter = ImGui::InputTextWithHint(
       "##code", "TK-XXXX-XXXX", ticket_code_, sizeof(ticket_code_),
       ImGuiInputTextFlags_EnterReturnsTrue);
+  // 回车核验后光标留在输入框里，方便连续检票。
+  if (enter) ImGui::SetKeyboardFocusHere(-1);
   ImGui::PopFont();
   if (FilledButton("核 验", Tone::kBlue, ImVec2(-1, Px(50))) || enter) {
     checkin_history_.insert(

@@ -83,6 +83,14 @@ CheckinResult CheckinService::Verify(const Actor& actor, Id session_id,
   store_->data().checkins.push_back({normalized, actor.user_id, now});
   audit_->Record(actor, "检票", "票 " + normalized, session->activity_id,
                  "通过");
+  // 通知持票人签到成功；事件键按票码去重，重复核验不会再发。
+  const Activity* activity = store_->FindActivity(session->activity_id);
+  notifier_->Notify(
+      reg->user_id, reg->id, "签到成功",
+      "你已在《" + (activity ? activity->title : std::string()) + "》" +
+          FormatShort(session->start_at) + " 场完成签到，票码 " + normalized +
+          "，签到时间 " + FormatShort(now) + "。祝你玩得开心！",
+      "checkin:" + normalized);
   tx.Commit();
   result.outcome = CheckinOutcome::kPassed;
   result.checked_at = now;
@@ -96,7 +104,11 @@ std::vector<const EventSession*> CheckinService::AssignedSessions(
   for (const CheckinAssignment& a : store_->data().assignments) {
     if (a.checker_id != actor.user_id) continue;
     const EventSession* session = store_->FindSession(a.session_id);
-    if (session != nullptr && !session->cancelled) result.push_back(session);
+    if (session == nullptr || session->cancelled || session->finished ||
+        clock_->Now() >= session->end_at) {
+      continue;
+    }
+    result.push_back(session);
   }
   std::sort(result.begin(), result.end(),
             [](const EventSession* a, const EventSession* b) {

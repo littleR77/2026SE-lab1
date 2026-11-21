@@ -30,7 +30,9 @@ std::vector<const Message*> Notifier::ListMine(const Actor& actor) const {
   std::vector<const Message*> result;
   if (actor.user_id == 0) return result;
   for (const Message& message : store_->data().messages) {
-    if (message.user_id == actor.user_id) result.push_back(&message);
+    if (message.user_id == actor.user_id && !message.deleted) {
+      result.push_back(&message);
+    }
   }
   std::sort(result.begin(), result.end(),
             [](const Message* a, const Message* b) { return a->id > b->id; });
@@ -53,6 +55,19 @@ void Notifier::MarkAllRead(const Actor& actor) {
       store_->MarkDirty();
     }
   }
+}
+
+Status Notifier::Delete(const Actor& actor, Id message_id) {
+  if (actor.user_id == 0) return Status::Error("请先登录");
+  for (Message& message : store_->data().messages) {
+    if (message.id != message_id) continue;
+    if (message.user_id != actor.user_id || message.deleted) break;
+    if (!message.read) return Status::Error("未读消息不能删除，请先标为已读");
+    message.deleted = true;
+    store_->MarkDirty();
+    return Status::Ok("消息已删除");
+  }
+  return Status::Error("消息不存在");
 }
 
 }  // namespace ticketing

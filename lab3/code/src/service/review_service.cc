@@ -61,15 +61,10 @@ Status ReviewService::ApproveChange(const Actor& actor, Id change_id,
   if (change == nullptr || change->status != ChangeStatus::kPending) {
     return Status::Error("该申请不在待审核状态，可能已被处理");
   }
+  const std::string blocker = ChangeBlocker(*change);
+  if (!blocker.empty()) return Status::Error(blocker + "，请关闭该申请");
   Activity* activity = store_->FindActivity(change->activity_id);
   EventSession* session = store_->FindSession(change->session_id);
-  if (activity->status != ActivityStatus::kPublished || session->cancelled ||
-      session->finished) {
-    return Status::Error("活动或场次状态已变化，不能应用该申请");
-  }
-  if (activity->version != change->base_version) {
-    return Status::Error("活动已被其他修改更新，请驳回后让组织者重新申请");
-  }
   for (const CapacityChange& item : change->capacities) {
     const TicketType* type = store_->FindTicketType(item.ticket_type_id);
     if (type == nullptr || item.capacity < type->capacity) {
@@ -114,6 +109,59 @@ Status ReviewService::RejectChange(const Actor& actor, Id change_id,
   audit_->Record(actor, "审核修改申请", ChangeLabel(change_id),
                  change->activity_id, "驳回");
   return Status::Ok("已驳回，原配置不变");
+}
+
+std::string ReviewService::ChangeBlocker(const ChangeRequest& change) const {
+  const Activity* activity = store_->FindActivity(change.activity_id);
+  const EventSession* session = store_->FindSession(change.session_id);
+  if (activity == nullptr || session == nullptr) return "活动或场次不存在";
+  if (activity->status != ActivityStatus::kPublished) {
+    return std::string("活动") + ActivityStatusName(activity->status);
+  }
+  if (session->cancelled) return "该场次已取消";
+  if (session->finished || clock_->Now() >= session->end_at) {
+    return "该场次已结束";
+  }
+  if (clock_->Now() >= session->start_at) return "该场次已开始";
+  if (activity->version != change.base_version) {
+    return "活动已被其他修改更新";
+  }
+  return "";
+}
+
+Status ReviewService::ExpireChange(const Actor& actor, Id change_id) {
+  if (actor.role != Role::kAdmin) return Status::Error("只有管理员可以审核");
+  ChangeRequest* change = store_->FindChangeRequest(change_id);
+  if (change == nullptr || change->status != ChangeStatus::kPending) {
+    return Status::Error("该申请不在待审核状态，可能已被处理");
+  }
+  const std::string blocker = ChangeBlocker(*change);
+  if (blocker.empty()) {
+    return Status::Error("该申请仍可审核，请选择通过或驳回");
+  }
+  change->status = ChangeStatus::kExpired;
+  change->reason = blocker;
+  store_->MarkDirty();
+  audit_->Record(actor, "审核修改申请", ChangeLabel(change_id),
+                 change->activity_id, "关闭 · " + blocker);
+  return Status::Ok("已关闭该申请：" + blocker);
+}
+
+int ReviewService::ExpireStaleChanges() {
+  const Actor system{0, Role::kAdmin};
+  int count = 0;
+  for (ChangeRequest& change : store_->data().change_requests) {
+    if (change.status != ChangeStatus::kPending) continue;
+    const std::string blocker = ChangeBlocker(change);
+    if (blocker.empty()) continue;
+    change.status = ChangeStatus::kExpired;
+    change.reason = blocker;
+    audit_->Record(system, "修改申请失效", ChangeLabel(change.id),
+                   change.activity_id, blocker);
+    ++count;
+  }
+  if (count > 0) store_->MarkDirty();
+  return count;
 }
 
 std::vector<const Activity*> ReviewService::PendingActivities(

@@ -36,11 +36,11 @@ System::System(Time now)
       activities(&store, &clock, &audit, &registrations),
       reviews(&store, &clock, &audit, &registrations),
       queries(&store),
-      checkins(&store, &clock, &audit),
+      checkins(&store, &clock, &audit, &notifier),
       comments(&store, &clock, &audit),
       favorites(&store, &clock, &audit),
       stats(&store),
-      scheduler(&store, &clock, &audit, &registrations) {
+      scheduler(&store, &clock, &audit, &registrations, &reviews) {
   // 各模块通过指针共享同一份数据、时钟和日志，构造顺序即依赖顺序。
 }
 
@@ -68,6 +68,12 @@ SchedulerReport System::AdvanceClock(Time minutes) {
   store.data().clock_now = clock.Now();
   store.MarkDirty();
   return scheduler.RunDue();
+}
+
+void System::RewindClock(Time minutes) {
+  clock.Advance(-minutes);
+  store.data().clock_now = clock.Now();
+  store.MarkDirty();
 }
 
 void System::Seed() {

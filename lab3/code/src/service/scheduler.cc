@@ -53,6 +53,7 @@ SchedulerReport Scheduler::RunDue() {
     }
   }
   if (report.expired + report.absent + report.ended > 0) store_->MarkDirty();
+  report.changes_expired = reviews_->ExpireStaleChanges();
   return report;
 }
 

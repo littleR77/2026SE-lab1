@@ -204,6 +204,62 @@ void TestCheckin() {
   EXPECT(repeat.checked_at == MakeTime(2026, 11, 5, 18, 40));
   EXPECT(f.sys.store.data().checkins.size() == 1);
   EXPECT(f.sys.checkins.CheckedInCount(f.session) == 1);
+  // 签到成功给持票人发一条消息，重复核验不再发。
+  int checkin_messages = 0;
+  for (const Message* m : f.sys.notifier.ListMine(f.people[0])) {
+    if (m->type == "签到成功") ++checkin_messages;
+  }
+  EXPECT(checkin_messages == 1);
+  // 场次结束后不再出现在检票员的场次列表中。
+  EXPECT(f.sys.checkins.AssignedSessions(f.checker).size() == 1);
+  f.sys.clock.Set(MakeTime(2026, 11, 5, 21, 0));
+  EXPECT(f.sys.checkins.AssignedSessions(f.checker).empty());
+}
+
+// 场次结束后，待审核的修改申请再也无法通过：管理员可以关闭，
+// 定时调度也会自动标为已失效。
+void TestStaleChangeRequest() {
+  Fixture f;
+  f.Publish(1);
+  const EventSession* s = f.sys.store.FindSession(f.session);
+  ChangeRequest change;
+  change.activity_id = f.activity;
+  change.session_id = f.session;
+  change.new_location = "体育馆";
+  change.new_start_at = s->start_at;
+  change.new_end_at = s->end_at;
+  change.new_reg_close_at = s->reg_close_at;
+  change.new_checkin_start_at = s->checkin_start_at;
+  change.capacities.push_back({f.type, 2});
+  Id change_id = 0;
+  EXPECT(f.sys.activities.RequestChange(f.org, change, &change_id).ok());
+  // 还能审核时不允许关闭。
+  EXPECT(f.sys.reviews.ChangeBlocker(
+             *f.sys.store.FindChangeRequest(change_id)).empty());
+  EXPECT(!f.sys.reviews.ExpireChange(f.admin, change_id).ok());
+
+  f.sys.clock.Set(MakeTime(2026, 11, 5, 21, 30));
+  int promoted = 0;
+  EXPECT(!f.sys.reviews.ApproveChange(f.admin, change_id, &promoted).ok());
+  EXPECT(!f.sys.reviews.ExpireChange(f.org, change_id).ok());  // 非管理员
+  EXPECT(f.sys.reviews.ExpireChange(f.admin, change_id).ok());
+  const ChangeRequest* closed = f.sys.store.FindChangeRequest(change_id);
+  EXPECT(closed->status == ChangeStatus::kExpired);
+  EXPECT(closed->reason == "该场次已结束");
+  EXPECT(f.sys.reviews.PendingChanges(f.admin).empty());
+
+  // 另一个活动的申请由定时调度自动失效。
+  Fixture g;
+  g.Publish(1);
+  change.activity_id = g.activity;
+  change.session_id = g.session;
+  change.capacities[0].ticket_type_id = g.type;
+  EXPECT(g.sys.activities.RequestChange(g.org, change, &change_id).ok());
+  g.sys.clock.Set(MakeTime(2026, 11, 5, 21, 30));
+  const SchedulerReport report = g.sys.scheduler.RunDue();
+  EXPECT(report.changes_expired == 1);
+  EXPECT(g.sys.store.FindChangeRequest(change_id)->status ==
+         ChangeStatus::kExpired);
 }
 
 void TestSchedulerMarksAbsent() {
@@ -377,6 +433,68 @@ void TestPersistence() {
   EXPECT(RemoveFile(path));
 }
 
+// 已读消息可以删除，未读和别人的不行；删除标记能保存，旧格式文件也能读。
+void TestMessageDelete() {
+  Fixture f;
+  f.Publish(1);
+  RegisterResult r1, r2;
+  f.sys.registrations.Register(f.people[0], f.session, f.type, &r1);
+  f.sys.registrations.Register(f.people[1], f.session, f.type, &r2);
+  const Actor& bob = f.people[1];  // 进入候补，收到一条候补提醒
+  std::vector<const Message*> mine = f.sys.notifier.ListMine(bob);
+  EXPECT(mine.size() == 1);
+  const Id id = mine.front()->id;
+  EXPECT(!f.sys.notifier.Delete(bob, id).ok());           // 未读
+  f.sys.notifier.MarkAllRead(bob);
+  EXPECT(!f.sys.notifier.Delete(f.people[0], id).ok());   // 别人的
+  EXPECT(f.sys.notifier.Delete(bob, id).ok());
+  EXPECT(f.sys.notifier.ListMine(bob).empty());
+  EXPECT(!f.sys.notifier.Delete(bob, id).ok());           // 已删除
+  // 事件键仍在，同一事件不会再次通知。
+  const std::string key = "waitlist:" + std::to_string(r2.registration_id);
+  EXPECT(!f.sys.notifier.Notify(bob.user_id, r2.registration_id, "候补提醒",
+                                "重复", key));
+
+  const std::string path = ExecutableDir() + "/core_test_messages.txt";
+  EXPECT(f.sys.store.Save(path).ok());
+  System reopened(0);
+  EXPECT(reopened.store.Load(path).ok());
+  EXPECT(reopened.notifier.ListMine(bob).empty());
+  // 去掉 MSG 行最后的删除标记，模拟旧版本保存的文件。
+  std::string text;
+  EXPECT(ReadWholeFile(path, &text));
+  std::string old_format;
+  size_t start = 0;
+  while (start < text.size()) {
+    size_t end = text.find('\n', start);
+    if (end == std::string::npos) end = text.size();
+    std::string line = text.substr(start, end - start);
+    if (line.compare(0, 4, "MSG\t") == 0) line.erase(line.rfind('\t'));
+    old_format += line + "\n";
+    start = end + 1;
+  }
+  EXPECT(WriteWholeFile(path, old_format));
+  System legacy(0);
+  EXPECT(legacy.store.Load(path).ok());
+  EXPECT(legacy.notifier.ListMine(bob).size() == 1);
+  EXPECT(RemoveFile(path));
+}
+
+// 往回拨时间只改时钟，不运行调度、不撤销已发生的处理。
+void TestRewindClock() {
+  Fixture f;
+  f.Publish(1);
+  const Time start = f.sys.clock.Now();
+  f.sys.AdvanceClock(kMinutesPerDay * 5);
+  EXPECT(f.sys.store.FindActivity(f.activity)->status ==
+         ActivityStatus::kEnded);
+  f.sys.RewindClock(kMinutesPerDay * 5);
+  EXPECT(f.sys.clock.Now() == start);
+  EXPECT(f.sys.store.data().clock_now == start);
+  EXPECT(f.sys.store.FindActivity(f.activity)->status ==
+         ActivityStatus::kEnded);
+}
+
 void TestSeedData() {
   System sys(MakeTime(2026, 11, 1, 10, 0));
   sys.Seed();
@@ -422,9 +540,12 @@ int main() {
       {"定时调度：候补失效与缺席", ticketing::TestSchedulerMarksAbsent},
       {"取消活动清空候补", ticketing::TestCancelActivityClearsWaitlist},
       {"修改申请与扩容递补", ticketing::TestChangeRequest},
+      {"无法通过的修改申请失效", ticketing::TestStaleChangeRequest},
       {"评论、点赞与评分", ticketing::TestCommentsAndRatings},
       {"收藏与统计", ticketing::TestFavoritesAndStats},
       {"数据保存与读取", ticketing::TestPersistence},
+      {"删除已读消息", ticketing::TestMessageDelete},
+      {"模拟时间倒回", ticketing::TestRewindClock},
       {"演示数据", ticketing::TestSeedData},
   };
   for (const Case& c : cases) {

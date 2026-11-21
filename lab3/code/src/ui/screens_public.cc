@@ -166,18 +166,41 @@ void App::DrawLogin(ImVec2 size) {
   const char* tabs[] = {"登录", "注册"};
   if (Segmented("tabs", tabs, 2, &login_tab_, inner)) login_error_.clear();
   ImGui::Dummy(ImVec2(0, Px(4)));
-  ImGui::SetNextItemWidth(inner);
-  ImGui::InputTextWithHint("##account", "请输入账号", account_,
-                           sizeof(account_));
-  if (login_tab_ == 1) {
+  // 在任一输入框按回车：还有空着的框就跳到第一个空框，全部填好才提交。
+  bool enter = false;
+  const auto field = [&](int index, const char* id, const char* hint,
+                         char* buffer, size_t size,
+                         ImGuiInputTextFlags flags) {
     ImGui::SetNextItemWidth(inner);
-    ImGui::InputTextWithHint("##nick", "请输入昵称", nickname_,
-                             sizeof(nickname_));
+    if (login_focus_ == index) {
+      ImGui::SetKeyboardFocusHere();
+      login_focus_ = 0;
+    }
+    flags |= ImGuiInputTextFlags_EnterReturnsTrue;
+    if (ImGui::InputTextWithHint(id, hint, buffer, size, flags)) enter = true;
+  };
+  field(1, "##account", "请输入账号", account_, sizeof(account_), 0);
+  if (login_tab_ == 1) {
+    field(2, "##nick", "请输入昵称", nickname_, sizeof(nickname_), 0);
   }
-  ImGui::SetNextItemWidth(inner);
-  const bool enter = ImGui::InputTextWithHint(
-      "##password", "请输入密码", password_, sizeof(password_),
-      ImGuiInputTextFlags_Password | ImGuiInputTextFlags_EnterReturnsTrue);
+  field(3, "##password", "请输入密码", password_, sizeof(password_),
+        ImGuiInputTextFlags_Password);
+  // 没有输入框处于编辑状态时按回车也算，例如刚切换完登录/注册。
+  if (!enter && !ImGui::IsAnyItemActive() &&
+      (ImGui::IsKeyPressed(ImGuiKey_Enter, false) ||
+       ImGui::IsKeyPressed(ImGuiKey_KeypadEnter, false))) {
+    enter = true;
+  }
+  if (enter) {
+    if (account_[0] == '\0') {
+      login_focus_ = 1;
+    } else if (login_tab_ == 1 && nickname_[0] == '\0') {
+      login_focus_ = 2;
+    } else if (password_[0] == '\0') {
+      login_focus_ = 3;
+    }
+    if (login_focus_ != 0) enter = false;
+  }
   ImGui::Dummy(ImVec2(0, Px(4)));
   const bool submit =
       FilledButton(login_tab_ == 0 ? "登录" : "注册并登录", Tone::kBlue,
@@ -541,17 +564,22 @@ void App::DrawComments(const Activity& activity) {
   Muted(("· " + std::to_string(sys_->comments.CountOf(activity.id)) + " 条")
             .c_str());
   // 任何人都能评论，游客需要填写昵称（REQ-036、REQ-040）。
+  bool focus_comment = false;
   if (actor_.user_id == 0) {
     ImGui::SetNextItemWidth(Px(120));
-    ImGui::InputTextWithHint("##guest", "你的昵称", guest_name_,
-                             sizeof(guest_name_));
+    // 昵称框按回车跳到评论框。
+    focus_comment = ImGui::InputTextWithHint(
+        "##guest", "你的昵称", guest_name_, sizeof(guest_name_),
+        ImGuiInputTextFlags_EnterReturnsTrue);
     ImGui::SameLine();
   }
   ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x - Px(80));
-  // 按回车与点击“发表”效果相同。
+  if (focus_comment) ImGui::SetKeyboardFocusHere();
+  // 按回车与点击“发表”效果相同，发表后光标留在评论框里方便继续输入。
   const bool comment_enter = ImGui::InputTextWithHint(
-      "##comment", "说点什么吧，游客也可以参与讨论～（回车发表）", comment_,
+      "##comment", "说点什么吧，游客也可以参与讨论～", comment_,
       sizeof(comment_), ImGuiInputTextFlags_EnterReturnsTrue);
+  if (comment_enter) ImGui::SetKeyboardFocusHere(-1);
   ImGui::SameLine();
   if (FilledButton("发表", Tone::kBlue, ImVec2(Px(70), 0)) || comment_enter) {
     const Status status = sys_->comments.Post(actor_, activity.id, 0,
@@ -625,7 +653,7 @@ void App::DrawComments(const Activity& activity) {
       if (reply_to_ == item->id) {
         ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x - Px(80));
         const bool reply_enter = ImGui::InputTextWithHint(
-            "##reply", ("回复 " + name + "（回车发送）").c_str(), reply_,
+            "##reply", ("回复 " + name).c_str(), reply_,
             sizeof(reply_), ImGuiInputTextFlags_EnterReturnsTrue);
         ImGui::SameLine();
         if (FilledButton("回复##send", Tone::kBlue, ImVec2(Px(70), 0)) ||

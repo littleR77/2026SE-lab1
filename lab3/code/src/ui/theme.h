@@ -43,6 +43,8 @@ bool FilledButton(const char* label, Tone tone, ImVec2 size = ImVec2(0, 0),
                   bool enabled = true);
 bool GhostButton(const char* label, ImVec2 size = ImVec2(0, 0),
                  bool enabled = true);
+// 垃圾桶图标按钮（边长 size 的正方形），悬停变红并显示 tooltip。
+bool TrashButton(const char* id, float size, const char* tooltip);
 // 分段选择器（如“登录 / 注册”），返回是否切换。
 bool Segmented(const char* id, const char* const* labels, int count,
                int* current, float width);

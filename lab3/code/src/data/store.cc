@@ -97,6 +97,10 @@ class LineReader {
   }
   bool Bool() { return Int() != 0; }
   std::string Str() { return Next(); }
+  // 后来新增的字段：旧数据文件里没有时取默认值，不算格式错误。
+  bool OptionalBool(bool fallback) {
+    return index_ < fields_.size() ? Bool() : fallback;
+  }
 
  private:
   const std::string& Next() {
@@ -277,7 +281,7 @@ Status Store::Save(const std::string& path) {
   for (const Message& m : data_.messages) {
     out += LineWriter("MSG").Int(m.id).Int(m.user_id).Int(m.registration_id)
                .Str(m.type).Str(m.content).Str(m.event_key).Bool(m.read)
-               .Int(m.created_at).Finish();
+               .Int(m.created_at).Bool(m.deleted).Finish();
   }
   for (const Comment& c : data_.comments) {
     out += LineWriter("CMT").Int(c.id).Int(c.activity_id).Int(c.parent_id)
@@ -440,6 +444,7 @@ Status Store::Load(const std::string& path) {
       m.event_key = r.Str();
       m.read = r.Bool();
       m.created_at = r.Int();
+      m.deleted = r.OptionalBool(false);
       loaded.messages.push_back(m);
     } else if (tag == "CMT") {
       Comment c;

@@ -236,6 +236,33 @@ bool GhostButton(const char* label, ImVec2 size, bool enabled) {
   return clicked;
 }
 
+bool TrashButton(const char* id, float size, const char* tooltip) {
+  const ImVec2 p = ImGui::GetCursorScreenPos();
+  const bool clicked = ImGui::InvisibleButton(id, ImVec2(size, size));
+  const bool hovered = ImGui::IsItemHovered();
+  if (hovered && tooltip != nullptr) ImGui::SetTooltip("%s", tooltip);
+  ImDrawList* list = ImGui::GetWindowDrawList();
+  const ImU32 color = hovered ? ToneColor(Tone::kRed)
+                              : IM_COL32(120, 135, 160, 255);
+  if (hovered) {
+    list->AddCircleFilled(ImVec2(p.x + size * 0.5f, p.y + size * 0.5f),
+                          size * 0.5f, IM_COL32(255, 255, 255, 200));
+  }
+  // 按比例画：盖子横线、提手、梯形桶身和两条竖纹。
+  const auto at = [&](float x, float y) {
+    return ImVec2(p.x + size * x, p.y + size * y);
+  };
+  const float t = std::max(1.0f, size * 0.07f);
+  list->AddLine(at(0.22f, 0.3f), at(0.78f, 0.3f), color, t);
+  list->AddRect(at(0.41f, 0.2f), at(0.59f, 0.3f), color, size * 0.04f, 0, t);
+  const ImVec2 body[] = {at(0.29f, 0.36f), at(0.71f, 0.36f), at(0.66f, 0.82f),
+                         at(0.34f, 0.82f)};
+  list->AddPolyline(body, 4, color, ImDrawFlags_Closed, t);
+  list->AddLine(at(0.45f, 0.46f), at(0.44f, 0.72f), color, t);
+  list->AddLine(at(0.55f, 0.46f), at(0.56f, 0.72f), color, t);
+  return clicked;
+}
+
 bool Segmented(const char* id, const char* const* labels, int count,
                int* current, float width) {
   bool changed = false;

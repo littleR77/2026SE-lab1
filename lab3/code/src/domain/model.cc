@@ -31,6 +31,7 @@ const char* ChangeStatusName(ChangeStatus status) {
     case ChangeStatus::kApproved: return "已通过";
     case ChangeStatus::kRejected: return "已驳回";
     case ChangeStatus::kWithdrawn: return "已撤回";
+    case ChangeStatus::kExpired: return "已失效";
   }
   return "";
 }

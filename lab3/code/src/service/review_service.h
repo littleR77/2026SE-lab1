@@ -36,6 +36,15 @@ class ReviewService {
   Status RejectChange(const Actor& actor, Id change_id,
                       const std::string& reason);
 
+  // 修改申请为什么已经无法通过；还能审核时返回空串。
+  // 场次已开始、结束或取消，活动不再是已发布，或活动版本已变化时无法通过。
+  std::string ChangeBlocker(const ChangeRequest& change) const;
+  // 管理员关闭一条无法通过的修改申请：待审核 -> 已失效，原因记为阻碍原因。
+  // 前置条件：actor 为管理员；申请仍待审核且 ChangeBlocker 非空。
+  Status ExpireChange(const Actor& actor, Id change_id);
+  // 由定时调度调用：把所有无法通过的待审核申请标为已失效，返回条数。
+  int ExpireStaleChanges();
+
   // 待审核的活动和修改申请，按提交时间升序。
   std::vector<const Activity*> PendingActivities(const Actor& actor) const;
   std::vector<const ChangeRequest*> PendingChanges(const Actor& actor) const;

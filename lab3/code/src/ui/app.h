@@ -137,6 +137,7 @@ class App {
   char account_[32] = "";
   char password_[32] = "";
   char nickname_[32] = "";
+  int login_focus_ = 0;  // 下一帧要聚焦的输入框：1 账号、2 昵称、3 密码
   std::string login_error_;
 
   // 活动广场。

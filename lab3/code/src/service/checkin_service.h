@@ -10,6 +10,7 @@
 #include "data/store.h"
 #include "domain/model.h"
 #include "service/audit_log.h"
+#include "service/notifier.h"
 
 namespace ticketing {
 
@@ -25,19 +26,22 @@ struct CheckinResult {
 
 class CheckinService {
  public:
-  CheckinService(Store* store, const Clock* clock, AuditLog* audit)
-      : store_(store), clock_(clock), audit_(audit) {}
+  CheckinService(Store* store, const Clock* clock, AuditLog* audit,
+                 Notifier* notifier)
+      : store_(store), clock_(clock), audit_(audit), notifier_(notifier) {}
 
   // 核验票码。
   // 前置条件：actor 为被授权该场次的检票员；当前时间在
   //           [检票开始, 场次结束) 内；场次未取消。
-  // 结果：有效正式票首次核验通过，报名转为已签到并记录核销时间和检票员；
-  //       已签到的票返回首次结果，不新增记录（kRepeated）；
+  // 结果：有效正式票首次核验通过，报名转为已签到并记录核销时间和检票员，
+  //       同时给持票人发送“签到成功”消息；
+  //       已签到的票返回首次结果，不新增记录也不重复发消息（kRepeated）；
   //       不存在、已失效、候补凭证、非本场次的票码均拒绝。
   CheckinResult Verify(const Actor& actor, Id session_id,
                        const std::string& code);
 
-  // actor 被授权的场次（未取消），按开始时间升序。
+  // actor 被授权、仍可检票的场次（未取消且尚未结束），按开始时间升序。
+  // 已结束的场次不能再检票，因此不出现在检票员的场次列表中。
   std::vector<const EventSession*> AssignedSessions(const Actor& actor) const;
   int CheckedInCount(Id session_id) const;
   // 应到人数：报名成功、已签到和缺席之和。
@@ -47,6 +51,7 @@ class CheckinService {
   Store* store_;
   const Clock* clock_;
   AuditLog* audit_;
+  Notifier* notifier_;
 };
 
 }  // namespace ticketing
